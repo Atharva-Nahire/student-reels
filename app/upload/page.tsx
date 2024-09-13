@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
-  const [speciality, setSpecialty] = useState("");
+  const [speciality, setSpeciality] = useState("");
   const [hospitalName, setHospitalName] = useState("");
   const [city, setCity] = useState("");
   const [document, setDocument] = useState<File | null>(null);
@@ -47,15 +47,13 @@ export default function UploadPage() {
               <label htmlFor="speciality" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Speciality
               </label>
-              <Select onValueChange={setSpecialty} required>
+              <Select onValueChange={setSpeciality} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select speciality" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="cardiology">Cardiology</SelectItem>
-                  <SelectItem value="neurology">Neurology</SelectItem>
-                  <SelectItem value="oncology">Oncology</SelectItem>
-                  <SelectItem value="pediatrics">Pediatrics</SelectItem>
+                  <SelectItem value="cardiologist">Cardiologist</SelectItem>
+                  <SelectItem value="interventional-cardiologist">Interventional Cardiologist</SelectItem>
                 </SelectContent>
               </Select>
             </div>
