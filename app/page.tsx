@@ -1,25 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stethoscope, UserCircle, Building2 } from "lucide-react";
+import { Stethoscope, UserCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [employeeId, setEmployeeId] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [division, setDivision] = useState("");
+  const [validEmployees, setValidEmployees] = useState<string[]>([]); // Store employee keys (valid IDs)
   const router = useRouter();
+
+  // Fetch employee data from /public/employee.json
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      try {
+        const res = await fetch("/employee.json");
+        const data = await res.json();
+
+        // Get all valid employee IDs (keys of the object)
+        const employeeIds = Object.keys(data);
+        setValidEmployees(employeeIds);
+      } catch (error) {
+        console.error("Error fetching employee data", error);
+      }
+    };
+
+    fetchEmployeeData();
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (employeeId && designation && division) {
+
+    // Check if employeeId exists in the list of validEmployees (keys)
+    if (employeeId && validEmployees.includes(employeeId)) {
       router.push("/upload");
     } else {
-      alert("Please fill in all fields");
+      alert("Invalid Employee ID. Please try again.");
     }
   };
 
