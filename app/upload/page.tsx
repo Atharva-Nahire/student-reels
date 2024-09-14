@@ -17,6 +17,7 @@ export default function UploadPage() {
   const [speciality, setSpeciality] = useState("");
   const [hospitalName, setHospitalName] = useState("");
   const [city, setCity] = useState("");
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [image, setImage] = useState<string | null>(null);
@@ -47,6 +48,14 @@ export default function UploadPage() {
 
     fetchVideo();
   }, [videoUploaded]);
+
+useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedEmployeeId = localStorage.getItem("employeeId");
+      setEmployeeId(storedEmployeeId);
+    }
+  }, []);
+
 
   const drawImage = () => {
     if (canvasRef.current) {
@@ -139,6 +148,7 @@ export default function UploadPage() {
         speciality,
         hospitalName,
         city,
+        employeeId,
         // overlayUrl,
         // documentUrl,
         // videoUrl,
@@ -161,7 +171,14 @@ setVideoUploaded(true);
       <div className="h-20 w-full"></div>
       <div className="h-12 w-full bg-red-800 fixed top-0 flex justify-around items-center text-white">
         <div className=""></div>
-        <Link href="/" className="">Logout</Link>
+        <Link href="/" className="">
+          Logout
+        </Link>
+      </div>
+      <div className="container py-2">
+        EmployeeId: {employeeId}
+        <br />
+        {/* Name: {employeeId} */}
       </div>
       <div className="container mx-auto p-4 w-full flex flex-col md:flex-row">
         <Card className=" max-w-screen mx-auto md:w-1/2">
