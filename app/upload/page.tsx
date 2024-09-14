@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -13,10 +13,76 @@ export default function UploadPage() {
   const [city, setCity] = useState("");
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState("");
+  const [text3, setText3] = useState("");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (typeof document !== "undefined" && document && document.fonts) {
+      const font = new FontFace("Fontwax", "url(/fontwax.ttf)");
+
+      font.load().then((loadedFont) => {
+        document.fonts.add(loadedFont);
+        drawImage();
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    drawImage();
+  }, [image, text1, text2, text3]);
+
+  const drawImage = () => {
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx?.drawImage(img, 0, 0);
+
+        ctx!.font = "48px Fontwax";
+        ctx!.fillStyle = "white";
+        ctx!.textAlign = "start";
+        ctx!.textBaseline = "middle";
+        ctx!.strokeStyle = "black";
+        ctx!.lineWidth = 2;
+
+        ctx!.fillText(doctorName, 150, canvas.height - 200);
+        ctx!.fillText(speciality, 150, canvas.height - 120);
+        ctx!.fillText(hospitalName, 150, canvas.height - 60);
+        ctx!.fillText(city, 150, canvas.height - 60);
+      };
+
+      // Set image source to static path
+      img.src = "/overlay.png";
+    }
+  };
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
+  const handleDownload = () => {
+    if (canvasRef.current) {
+      const link = document.createElement("a");
+      link.download = "doctor_info.png";
+      link.href = canvasRef.current.toDataURL();
+      link.click();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, you would send this data to your backend
     console.log({
       doctorName,
       speciality,
@@ -81,6 +147,16 @@ export default function UploadPage() {
               </label>
               <Input id="video" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} required />
             </div>
+
+            {
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Preview:</h3>
+                <canvas ref={canvasRef} className="max-w-full h-auto" />
+                <Button onClick={handleDownload} className="w-full">
+                  Download Image
+                </Button>
+              </div>
+            }
             <Button type="submit" className="w-full">
               Submit
             </Button>
