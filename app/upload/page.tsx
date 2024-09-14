@@ -11,6 +11,7 @@ import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/config/firebase";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
@@ -117,7 +118,7 @@ useEffect(() => {
     e.preventDefault();
 
     if (!canvasRef.current || !document || !video) {
-      alert("Please fill in all required fields and upload necessary files.");
+      toast.warn("Please fill in all required fields and upload necessary files.");
       return;
     }
 
@@ -140,7 +141,7 @@ useEffect(() => {
       });
 
       console.log(response.data);
-      alert("video submitted successfully!");
+      toast.success("video submitted successfully!");
 
       // Add data to Firestore
       const docRef = await addDoc(collection(db, "employee-data"), {
@@ -162,7 +163,7 @@ setVideoUploaded(true);
 
     } catch (error) {
       console.error("Error uploading files:", error);
-      alert("An error occurred while uploading files.");
+      toast.error("An error occurred while uploading files.");
     }
   };
 
