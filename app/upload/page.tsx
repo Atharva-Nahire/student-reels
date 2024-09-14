@@ -10,6 +10,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/config/firebase";
+import Link from "next/link";
 
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
@@ -65,12 +66,12 @@ export default function UploadPage() {
         ctx!.strokeStyle = "black";
         ctx!.lineWidth = 2;
 
-        ctx!.fillText(doctorName, 150, canvas.height - 200);
-        ctx!.textAlign = "center";
+        ctx!.fillText("Dr. " + doctorName, 150, canvas.height - 200);
+        ctx!.textAlign = "start";
         ctx!.font = "42px Fontwax";
-        ctx!.fillText(speciality, 350, canvas.height - 130);
-        ctx!.fillText(hospitalName, 350, canvas.height - 90);
-        ctx!.fillText(city, 350, canvas.height - 50);
+        ctx!.fillText(speciality.toUpperCase().replaceAll("-"," "), 150, canvas.height - 130);
+        ctx!.fillText(hospitalName, 150, canvas.height - 90);
+        ctx!.fillText(city, 150, canvas.height - 50);
       };
 
       img.src = "/overlay.png";
@@ -156,84 +157,103 @@ setVideoUploaded(true);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Upload Doctor Information</CardTitle>
-          <CardDescription>Please fill in the doctor's details and upload required files</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="doctorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Doctor Name
-              </label>
-              <Input id="doctorName" value={doctorName ? `${doctorName}` : ""} onChange={(e) => setDoctorName(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="speciality" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Speciality
-              </label>
-              <Select onValueChange={setSpeciality} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select speciality" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="cardiologist">Cardiologist</SelectItem>
-                  <SelectItem value="interventional-cardiologist">Interventional Cardiologist</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="hospitalName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Hospital Name
-              </label>
-              <Input id="hospitalName" value={hospitalName} onChange={(e) => setHospitalName(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="city" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                City
-              </label>
-              <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="document" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Upload Document (Visiting Card / Prescription)
-              </label>
-              <Input id="document" type="file" onChange={(e) => setDocument(e.target.files?.[0] || null)} required />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="video" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Upload Doctor Video
-              </label>
-              <Input id="video" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} required />
-            </div>
-
-            {
-              !videoUploaded && (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Preview:</h3>
-                  <canvas ref={canvasRef} className="max-w-full h-auto" />
-                  {/* <Button onClick={handleDownload} className="w-full">
-                  Download Image
-                </Button> */}
+    <div>
+      <div className="h-20 w-full"></div>
+      <div className="h-12 w-full bg-red-800 fixed top-0 flex justify-around items-center text-white">
+        <div className=""></div>
+        <Link href="/" className="">Logout</Link>
+      </div>
+      <div className="container mx-auto p-4 w-full flex flex-col md:flex-row">
+        <Card className=" max-w-screen mx-auto md:w-1/2">
+          <CardHeader>
+            <CardTitle>Upload Doctor Information</CardTitle>
+            <CardDescription>Please fill in the doctor's details and upload required files</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="doctorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Doctor Name
+                </label>
+                <div className="flex justify-start gap-4">
+                  <p>Dr. </p>
+                  <Input id="doctorName" value={doctorName ? `${doctorName}` : ""} onChange={(e) => setDoctorName(e.target.value)} required />
                 </div>
-              )
-            }
-            <a ref={linkRef} style={{ display: "none" }}>
-              Download Link
-            </a>
-            {videoUploaded && (
-              <video ref={videoRef} controls width="600">
-                Your browser does not support the video tag.
-              </video>
-            )}
-            <Button type="submit" className="w-full">
-              Submit
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="speciality" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Speciality
+                </label>
+                <Select onValueChange={setSpeciality} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select speciality" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cardiologist">Cardiologist</SelectItem>
+                    <SelectItem value="interventional-cardiologist">Interventional Cardiologist</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="hospitalName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Hospital Name
+                </label>
+                <Input id="hospitalName" value={hospitalName} onChange={(e) => setHospitalName(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="city" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  City
+                </label>
+                <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="document" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Upload Document (Visiting Card / Prescription)
+                </label>
+                <Input id="document" type="file" onChange={(e) => setDocument(e.target.files?.[0] || null)} required />
+              </div>
+              <div className="space-y-2 pt-4">
+                <label htmlFor="video" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Upload Doctor Video
+                </label>
+                <div className="text-sm text-black py-4">
+                  Recommended Video settings - MP4 (H.264) <br />
+                  - 1080p (1920x1080) <br />
+                  - 30fps <br />
+                  <p>
+                    - max size 15MB <br />- max duration - <b>40 seconds</b> <br />
+                  </p>
+                  <p>
+                    - Aspect ratio 16:9 <br />- Landscape mode video <b>(Horizontal Layout)</b> <br />
+                  </p>
+                </div>
+                <Input id="video" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} required />
+              </div>
+
+              <a ref={linkRef} style={{ display: "none" }}>
+                Download Link
+              </a>
+              <Button type="submit" className="w-full">
+                Submit
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+        <div className="md:w-1/2 pt-20">
+          {!videoUploaded && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Preview of how the name appears:</h3>
+              <canvas ref={canvasRef} className="max-w-full h-auto bg-black border border-black" />
+            </div>
+          )}
+
+          {videoUploaded && (
+            <video ref={videoRef} controls width="600">
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

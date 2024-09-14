@@ -13,11 +13,6 @@ const RootLayout: FC = ({ children }) => {
         <body>
           <ToastContainer />
           <div className="">
-            <div className="bg-gray-900 w-full py-5 h-20  top-0 px-10 flex justify-end items-center text-white">
-              <Link href="/" className="container cursor-pointer">
-                <HomeIcon className="h-12 w-12" />
-              </Link>
-            </div>
             <div className="min-h-screen">{children}</div>
           </div>
         </body>
