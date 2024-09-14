@@ -18,7 +18,7 @@ export default function UploadPage() {
   const [text2, setText2] = useState("");
   const [text3, setText3] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const linkRef = useRef<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     drawImage();
@@ -54,6 +54,7 @@ export default function UploadPage() {
       img.src = "/overlay.png";
     }
   };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
@@ -65,12 +66,19 @@ export default function UploadPage() {
   };
 
   const handleDownload = () => {
-    if (canvasRef.current) {
-      const link = document.createElement("a");
-      link.download = "doctor_info.png";
-      link.href = canvasRef.current.toDataURL();
-      link.click();
-    }
+    if (typeof window === "undefined" || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const url = URL.createObjectURL(blob);
+      if (linkRef.current) {
+        linkRef.current.href = url;
+        linkRef.current.download = "doctor_info.png";
+        linkRef.current.click();
+        URL.revokeObjectURL(url);
+      }
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -149,6 +157,10 @@ export default function UploadPage() {
                 </Button>
               </div>
             }
+            <a ref={linkRef} style={{ display: "none" }}>
+              Download Link
+            </a>
+
             <Button type="submit" className="w-full">
               Submit
             </Button>
