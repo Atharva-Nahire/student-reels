@@ -35,7 +35,7 @@ export default function UploadPage() {
         canvas.height = img.height;
         ctx?.drawImage(img, 0, 0);
 
-        ctx!.font = "48px Fontwax";
+        ctx!.font = "42px Fontwax";
         ctx!.fillStyle = "white";
         ctx!.textAlign = "start";
         ctx!.textBaseline = "middle";
@@ -99,7 +99,7 @@ export default function UploadPage() {
               <label htmlFor="doctorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Doctor Name
               </label>
-              <Input id="doctorName" value={doctorName} onChange={(e) => setDoctorName(e.target.value)} required />
+              <Input id="doctorName" value={doctorName ? `${doctorName}` : ""} onChange={(e) => setDoctorName(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <label htmlFor="speciality" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
