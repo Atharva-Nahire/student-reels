@@ -75,3 +75,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: "Fontwax";
+  src: url("/fontwax.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+canvas {
+  font-family: "Fontwax";
+}

@@ -19,16 +19,6 @@ export default function UploadPage() {
   const [text3, setText3] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    if (typeof document !== "undefined" && document && document.fonts) {
-      const font = new FontFace("Fontwax", "url(/fontwax.ttf)");
-
-      font.load().then((loadedFont) => {
-        document.fonts.add(loadedFont);
-        drawImage();
-      });
-    }
-  }, []);
 
   useEffect(() => {
     drawImage();
