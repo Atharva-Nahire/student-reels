@@ -6,6 +6,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axios from "axios";
 
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "@/config/firebase";
+
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
   const [speciality, setSpeciality] = useState("");
@@ -14,12 +19,33 @@ export default function UploadPage() {
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [image, setImage] = useState<string | null>(null);
+  const [videoUploaded, setVideoUploaded] = useState<boolean | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     drawImage();
   }, [image, doctorName, speciality, hospitalName, city]);
+
+
+  useEffect(() => {
+    if(!videoUploaded)return;
+    const fetchVideo = async () => {
+      console.log("Fetching the video now");
+      const res = await axios.get("http://localhost:8000/video", {
+        responseType: "blob",
+      });
+
+      // Create a URL for the blob object and set it as the video source
+      const videoURL = URL.createObjectURL(new Blob([res.data], { type: "video/mp4" }));
+      if (videoRef.current) {
+        videoRef.current.src = videoURL;
+      }
+    };
+
+    fetchVideo();
+  }, [videoUploaded]);
 
   const drawImage = () => {
     if (canvasRef.current) {
@@ -104,7 +130,25 @@ export default function UploadPage() {
       });
 
       console.log(response.data);
-      alert("Data submitted successfully!");
+      alert("video submitted successfully!");
+
+      // Add data to Firestore
+      const docRef = await addDoc(collection(db, "employee-data"), {
+        doctorName,
+        speciality,
+        hospitalName,
+        city,
+        // overlayUrl,
+        // documentUrl,
+        // videoUrl,
+        timestamp: new Date(),
+      });
+
+      console.log("Document written with ID: ", docRef.id);
+
+console.log("fetching the video now")
+setVideoUploaded(true);
+
     } catch (error) {
       console.error("Error uploading files:", error);
       alert("An error occurred while uploading files.");
@@ -166,18 +210,24 @@ export default function UploadPage() {
             </div>
 
             {
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium">Preview:</h3>
-                <canvas ref={canvasRef} className="max-w-full h-auto" />
-                <Button onClick={handleDownload} className="w-full">
+              !videoUploaded && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Preview:</h3>
+                  <canvas ref={canvasRef} className="max-w-full h-auto" />
+                  {/* <Button onClick={handleDownload} className="w-full">
                   Download Image
-                </Button>
-              </div>
+                </Button> */}
+                </div>
+              )
             }
             <a ref={linkRef} style={{ display: "none" }}>
               Download Link
             </a>
-
+            {videoUploaded && (
+              <video ref={videoRef} controls width="600">
+                Your browser does not support the video tag.
+              </video>
+            )}
             <Button type="submit" className="w-full">
               Submit
             </Button>
