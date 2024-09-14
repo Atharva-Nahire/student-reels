@@ -32,7 +32,7 @@ export default function UploadPage() {
 
   useEffect(() => {
     drawImage();
-  }, [image, text1, text2, text3]);
+  }, [image, doctorName, speciality, hospitalName, city]);
 
   const drawImage = () => {
     if (canvasRef.current) {
@@ -53,9 +53,11 @@ export default function UploadPage() {
         ctx!.lineWidth = 2;
 
         ctx!.fillText(doctorName, 150, canvas.height - 200);
-        ctx!.fillText(speciality, 150, canvas.height - 120);
-        ctx!.fillText(hospitalName, 150, canvas.height - 60);
-        ctx!.fillText(city, 150, canvas.height - 60);
+        ctx!.textAlign = "center";
+        ctx!.font = "42px Fontwax";
+        ctx!.fillText(speciality, 350, canvas.height - 130);
+        ctx!.fillText(hospitalName, 350, canvas.height - 90);
+        ctx!.fillText(city, 350, canvas.height - 50);
       };
 
       // Set image source to static path
