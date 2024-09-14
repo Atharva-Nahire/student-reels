@@ -1,10 +1,10 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import axios from "axios";
 
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
@@ -14,9 +14,6 @@ export default function UploadPage() {
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [image, setImage] = useState<string | null>(null);
-  const [text1, setText1] = useState("");
-  const [text2, setText2] = useState("");
-  const [text3, setText3] = useState("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement | null>(null);
 
@@ -50,7 +47,6 @@ export default function UploadPage() {
         ctx!.fillText(city, 350, canvas.height - 50);
       };
 
-      // Set image source to static path
       img.src = "/overlay.png";
     }
   };
@@ -81,17 +77,38 @@ export default function UploadPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      doctorName,
-      speciality,
-      hospitalName,
-      city,
-      document,
-      video,
-    });
-    alert("Data submitted successfully!");
+
+    if (!canvasRef.current || !document || !video) {
+      alert("Please fill in all required fields and upload necessary files.");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Convert canvas to blob
+    const canvasBlob = await new Promise<Blob | null>((resolve) => canvasRef.current?.toBlob(resolve));
+    if (canvasBlob) {
+      formData.append("overlay", canvasBlob, "doctor_info.png");
+  }
+
+    formData.append("video", video);
+    formData.append("document", document);
+
+    try {
+      const response = await axios.post("http://localhost:8000/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(response.data);
+      alert("Data submitted successfully!");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      alert("An error occurred while uploading files.");
+    }
   };
 
   return (
