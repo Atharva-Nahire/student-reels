@@ -4,6 +4,7 @@ import { collection, query, orderBy, startAfter, limit, getDocs, doc, updateDoc,
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { db } from '@/config/firebase';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function AdminPanel() {
   const [submissions, setSubmissions] = useState([]);
@@ -138,7 +139,20 @@ export default function AdminPanel() {
                 {submissions.map((submission) => (
                   <tr key={submission.id}>
                     <td className="p-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</td>
-                    <td className="p-2">{editingId === submission.id ? <input type="text" name="speciality" value={editForm.speciality} onChange={handleChange} className="border p-1" /> : submission.speciality}</td>
+                    <td className="p-2">
+                      {editingId === submission.id ? (
+                        <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
+                          <option name="interventional-cardiologist	" value="interventional-cardiologist	">
+                            interventional-cardiologist
+                          </option>
+                          <option name="cardiologist	" value="cardiologist	">
+                            cardiologist
+                          </option>
+                        </select>
+                      ) : (
+                        submission.speciality
+                      )}
+                    </td>
                     <td className="p-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</td>
                     <td className="p-2">{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</td>
                     <td className="p-2">{submission.employeeId}</td>

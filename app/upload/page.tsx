@@ -26,52 +26,106 @@ export default function UploadPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [videoError, setVideoError] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Ensure the code runs on the client side by setting isMounted to true
+    useEffect(() => {
+      setIsMounted(true);
+    }, []);
+
   useEffect(() => {
     drawImage();
   }, [image, doctorName, speciality, hospitalName, city]);
-  const validateVideo = (file: File) => {
-    // Check file size (max 15MB)
-    const maxSize = 15 * 1024 * 1024; // 15MB in bytes
-    if (file.size > maxSize) {
-      setVideoError("Video size exceeds 15MB limit");
-      return false;
-    }
 
-    // Check file type
-    const allowedTypes = ["video/mp4"];
-    if (!allowedTypes.includes(file.type)) {
-      setVideoError("Only MP4 videos are allowed");
-      return false;
-    }
 
-    // Reset error if validation passes
-    setVideoError(null);
-    return true;
+  const validateVideo = (file: File): Promise<boolean> => {
+    return new Promise<boolean>((resolve) => {
+      // Check file size (max 15MB)
+      const maxSize = 15 * 1024 * 1024; // 15MB in bytes
+      if (file.size > maxSize) {
+        setVideoError("Video size exceeds 15MB limit");
+        resolve(false);
+        return;
+      }
+
+      // Check file type (only MP4 allowed)
+      const allowedTypes = ["video/mp4"];
+      if (!allowedTypes.includes(file.type)) {
+        setVideoError("Only MP4 videos are allowed");
+        resolve(false);
+        return;
+      }
+
+      // Ensure the code runs only on the client-side
+      if (typeof window !== "undefined") {
+        if (!videoRef.current) {
+          videoRef.current = document.createElement("video");
+        }
+
+        const video = videoRef.current;
+        const videoURL = URL.createObjectURL(file);
+        video.src = videoURL;
+
+        video.onloadedmetadata = () => {
+          // Check video resolution (1080p)
+          // if (video.videoWidth !== 1920 || video.videoHeight !== 1080) {
+          //   setVideoError("Video resolution must be 1920x1080 (1080p) Horizontal");
+          //   resolve(false);
+          //   return;
+          // }
+
+          // Check frame rate (30fps)
+          // const frameRate = video.videoHeight / video.duration;
+          // if (Math.round(frameRate) !== 30) {
+          //   setVideoError("Video frame rate must be 30fps");
+          //   resolve(false);
+          //   return;
+          // }
+
+          // Check duration (max 40 seconds)
+          if (video.duration > 40) {
+            setVideoError("Video duration exceeds 40 seconds limit");
+            resolve(false);
+            return;
+          }
+
+          // Check aspect ratio (16:9)
+          const aspectRatio = video.videoWidth / video.videoHeight;
+          if (aspectRatio !== 16 / 9) {
+            setVideoError("Video must have a 16:9 aspect ratio");
+            resolve(false);
+            return;
+          }
+
+          // Check if the video is in landscape mode
+          if (video.videoWidth < video.videoHeight) {
+            setVideoError("Video must be in landscape mode (horizontal layout)");
+            resolve(false);
+            return;
+          }
+
+          // Reset error if all validations pass
+          setVideoError(null);
+          resolve(true);
+        };
+
+        video.onerror = () => {
+          setVideoError("There was an error loading the video");
+          resolve(false);
+        };
+      }
+    });
   };
+
+
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      if (validateVideo(file)) {
+      if (!validateVideo(file)) return
         setVideo(file);
-        if (document) {
-          //@ts-ignore
-          const videoElement = document.createElement("video");
-          videoElement.preload = "metadata";
-          videoElement.onloadedmetadata = () => {
-            window.URL.revokeObjectURL(videoElement.src);
-            if (videoElement.duration > 10) {
-              setVideoError("Video duration exceeds 10 seconds limit");
-              setVideo(null);
-            } else if (videoElement.videoWidth !== 1920 || videoElement.videoHeight !== 1080) {
-              setVideoError("Video resolution must be 1920x1080 (1080p)");
-              setVideo(null);
-            }
-          };
-          videoElement.src = URL.createObjectURL(file);
-        }
-      }
     }
   };
 
@@ -339,9 +393,13 @@ export default function UploadPage() {
         </Card>
         <div className="md:w-1/2 pt-20">
           {!videoUploaded && (
-            <div className="space-y-2">
+            <div className="space-y-2 relative w-full">
               <h3 className="text-sm font-medium">Video Title Preview:</h3>
-              <canvas ref={canvasRef} className="max-w-full h-auto bg-black border border-black" />
+              <canvas ref={canvasRef} className="max-w-full absolute h-auto bg-transparent border border-black" />
+
+              <video ref={videoRef} autoPlay className="absolute w-full -z-10" controls width="600">
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
           {videoUploaded && (
