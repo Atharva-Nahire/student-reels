@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axios from "axios";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
@@ -12,6 +13,37 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/config/firebase";
 import Link from "next/link";
 import { toast } from "react-toastify";
+
+
+const s3Client = new S3Client({
+  endpoint: process.env.NEXT_PUBLIC_AWS_ENDPOINT,
+  forcePathStyle: false,
+  region: process.env.NEXT_PUBLIC_AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+const uploadObject = async (file : File | Blob) => {
+  const params = {
+    Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
+    Key: `marketplace/product-images/${process.env.NEXT_PUBLIC_WHITE_LABEL_FOR}/${Date.now()}_${file.name}`,
+    Body: file,
+    ACL: "public-read",
+  };
+
+  try {
+    const toastId = toast.loading("Uploading Image");
+    const data = await s3Client.send(new PutObjectCommand(params));
+    toast.dismiss(toastId);
+    toast.success("File Uploaded, do not close this page");
+    const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.cdn.digitaloceanspaces.com/${params.Key}`;
+    return { data, url: uploadedObjectUrl };
+  } catch (err) {
+    toast.error("Error Uploading object", err);
+  }
+};
 
 export default function UploadPage() {
   const [doctorName, setDoctorName] = useState("");
@@ -222,11 +254,16 @@ export default function UploadPage() {
       return;
     }
     toast.loading("Uploading Video");
+    toast.warn("Uploading to Cloud Storage");
+
+    uploadObject(video);
+    uploadObject(document);
     const formData = new FormData();
 
     // Convert canvas to blob
     const canvasBlob = await new Promise<Blob | null>((resolve) => canvasRef.current?.toBlob(resolve));
     if (canvasBlob) {
+    uploadObject(canvasBlob);
       formData.append("overlay", canvasBlob, "doctor_info.png");
     }
 
@@ -252,9 +289,9 @@ export default function UploadPage() {
         },
       });
       toast.update(toastId, {
-        render: "Upload Complete", // Change the message to upload complete
+        render: "Upload Complete, do not refresh the page until the video processes", // Change the message to upload complete
         //  type: toast.success, // Change the toast type to success
-        autoClose: 3000, // Set autoClose time to 3 seconds
+        autoClose: 12000, // Set autoClose time to 3 seconds
       });
       console.log(response.data);
       toast.dismiss();
