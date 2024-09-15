@@ -16,6 +16,8 @@ const config = {
     },
     extend: {
       colors: {
+        natcored: "#F92C0A",
+        natcoblue: "#0156ac",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
