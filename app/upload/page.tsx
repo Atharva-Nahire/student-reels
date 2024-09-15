@@ -29,16 +29,16 @@ const s3Client = new S3Client({
 const uploadObject = async (file : File | Blob) => {
   const params = {
     Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-    Key: `marketplace/product-images/${process.env.NEXT_PUBLIC_WHITE_LABEL_FOR}/${Date.now()}_${file.name}`,
+    Key: `submissions/${process.env.NEXT_PUBLIC_WHITE_LABEL_FOR}/${Date.now()}_${file.name}`,
     Body: file,
     ACL: "public-read",
   };
 
   try {
-    const toastId = toast.loading("Uploading Image");
+    // const toastId = toast.loading("Uploading Image");
     const data = await s3Client.send(new PutObjectCommand(params));
     toast.dismiss(toastId);
-    toast.success("File Uploaded, do not close this page");
+    // toast.success("File Uploaded, do not close this page");
     const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.cdn.digitaloceanspaces.com/${params.Key}`;
     return { data, url: uploadedObjectUrl };
   } catch (err) {
@@ -76,9 +76,9 @@ export default function UploadPage() {
   const validateVideo = (file: File): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
       // Check file size (max 15MB)
-      const maxSize = 15 * 1024 * 1024; // 15MB in bytes
+      const maxSize = 20 * 1024 * 1024; // 15MB in bytes
       if (file.size > maxSize) {
-        setVideoError("Video size exceeds 15MB limit");
+        setVideoError("Video size exceeds 20MB limit");
         resolve(false);
         return;
       }
@@ -125,12 +125,12 @@ export default function UploadPage() {
           }
 
           // Check aspect ratio (16:9)
-          const aspectRatio = video.videoWidth / video.videoHeight;
-          if (aspectRatio !== 16 / 9) {
-            setVideoError("Video must have a 16:9 aspect ratio");
-            resolve(false);
-            return;
-          }
+          // const aspectRatio = video.videoWidth / video.videoHeight;
+          // if (aspectRatio !== 16 / 9) {
+          //   setVideoError("Video must have a 16:9 aspect ratio");
+          //   resolve(false);
+          //   return;
+          // }
 
           // Check if the video is in landscape mode
           if (video.videoWidth < video.videoHeight) {
@@ -167,7 +167,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://sa-bargain-db-run.trycloudflare.com/video", {
+      const res = await axios.get("https://pics-supplied-taking-tvs.trycloudflare.com/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -254,8 +254,8 @@ export default function UploadPage() {
       toast.error(videoError);
       return;
     }
-    toast.loading("Uploading Video");
-    toast.warn("Uploading to Cloud Storage");
+    // toast.loading("Uploading Video");
+    // toast.warn("Uploading to Cloud Storage");
 
     uploadObject(video);
     uploadObject(document);
@@ -276,7 +276,7 @@ export default function UploadPage() {
     });
 
     try {
-      const response = await axios.post("https://sa-bargain-db-run.trycloudflare.com/upload", formData, {
+      const response = await axios.post("https://pics-supplied-taking-tvs.trycloudflare.com/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -324,17 +324,18 @@ export default function UploadPage() {
       setVideo(null);
       setImage(null);
       setVideoUploaded(false);
+toast.dismiss();
       // };
     } catch (error) {
       console.error("Error uploading files:", error);
-      toast.error("An error occurred while uploading files.");
+      toast.error("An error occurred while uploading files.",);
     }
   };
 
   return (
     <div>
       <div className="h-20 w-full"></div>
-      <div className="h-12 w-screen bg-natcored  font-bolder fixed top-0 flex justify-between items-center text-white">
+      <div className="h-12 w-full bg-natcored  font-bolder fixed top-0 flex justify-between items-center text-white">
         <div className="">
           <img src="/logo.png" className="h-16 w-auto" />
         </div>
@@ -353,7 +354,7 @@ export default function UploadPage() {
         {/* Name: {employeeId} */}
       </div>
       <div className="container text-natcoblue mx-auto p-4 w-full flex flex-col md:flex-row">
-        <Card className=" max-w-screen mx-auto md:w-1/2">
+        <Card className=" max-w-full mx-auto md:w-1/2">
           <CardHeader>
             <CardTitle className="text-natcoblue">Upload Doctor Information</CardTitle>
             <CardDescription>Please fill in the doctor's details and upload required files</CardDescription>
@@ -407,13 +408,15 @@ export default function UploadPage() {
                 </label>
                 <div className="text-sm text-natcoblue py-4">
                   Recommended Video settings - MP4 (H.264) <br />
-                  - 1080p (1920x1080) <br />
-                  - 30fps <br />
+                  {/* - 1080p (1920x1080) <br /> */}
+                  {/* - 30fps <br /> */}
                   <p>
-                    - max size 15MB <br />- max duration - <b>40 seconds</b> <br />
+                    - max size 15MB <br />
+                    - max duration - <b>40 seconds</b> <br />
                   </p>
                   <p>
-                    - Aspect ratio 16:9 <br />- Landscape mode video <b>(Horizontal Layout)</b> <br />
+                    - Aspect ratio 16:9 <br />
+                    - Landscape mode video <b>(Horizontal Layout)</b> <br />
                   </p>
                 </div>
                 <Input id="video" type="file" accept="video/mp4" onChange={handleVideoUpload} required />
