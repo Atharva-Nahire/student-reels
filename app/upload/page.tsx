@@ -42,7 +42,7 @@ const uploadObject = async (file : File | Blob) => {
     const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.cdn.digitaloceanspaces.com/${params.Key}`;
     return { data, url: uploadedObjectUrl };
   } catch (err) {
-    toast.error("Error Uploading object", err);
+    console.log("Error Uploading object", err);
   }
 };
 

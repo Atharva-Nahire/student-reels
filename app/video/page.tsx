@@ -111,9 +111,9 @@ export default function AdminPanel() {
                       {/* {submission.generatedVideoUrl ? ( */}
                       <video controls src={"https://pics-supplied-taking-tvs.trycloudflare.com/video"} className="py-2" />
                       {/* ) : <div className="py-8 aspect-video text-center">Video is pending Approval</div>} */}
-
-                      <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</p>
+                      <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1 font-bold text-xl" /> : " Dr. " + submission.doctorName}</p>
                       <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</p>
+                      <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.city}</p>
                       <p className="text-sm pl-2">{new Date(submission.timestamp.seconds * 1000).toLocaleDateString()}</p>
                     </Card>
                   ))}
