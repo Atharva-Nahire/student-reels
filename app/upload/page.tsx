@@ -37,7 +37,7 @@ export default function UploadPage() {
 
       const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 8000));
       const res = await axios.get("http://64.227.132.145:30008/video", {
         responseType: "stream",   // Changed from "blob" to "stream"
       });
