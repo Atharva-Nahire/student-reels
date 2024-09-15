@@ -36,7 +36,6 @@ export default function UploadPage() {
     if(!videoUploaded)return;
 
       const fetchVideo = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 12000));
       toast.success("Fetching the transformed video");
       const res = await axios.get("https://gnome-separation-preferred-heel.trycloudflare.com/video", {
         responseType: "blob",   // Changed from "blob" to "stream"
@@ -275,7 +274,11 @@ setVideoUploaded(true);
               <canvas ref={canvasRef} className="max-w-full h-auto bg-black border border-black" />
             </div>
           )}
+          {
+            videoUploaded &&
 
+<Link href="/video" className="underline text-blue-600">video </Link>
+          }
           {videoUploaded && (
             <video ref={videoRef} controls width="600">
               Your browser does not support the video tag.
