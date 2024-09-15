@@ -5,7 +5,7 @@ const Page = () => {
 
  return (
 <>
-<video src="https://gnome-separation-preferred-heel.trycloudflare.com/video" controls autoPlay loop className="w-full h-auto"/>
+<video src="https://sa-bargain-db-run.trycloudflare.com/video" controls autoPlay loop className="w-full h-auto"/>
 </>
 );
 }

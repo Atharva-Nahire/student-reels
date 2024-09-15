@@ -26,18 +26,60 @@ export default function UploadPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const linkRef = useRef<HTMLAnchorElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
+const [videoError, setVideoError] = useState<string | null>(null);
   useEffect(() => {
     drawImage();
   }, [image, doctorName, speciality, hospitalName, city]);
+const validateVideo = (file: File) => {
+  // Check file size (max 15MB)
+  const maxSize = 15 * 1024 * 1024; // 15MB in bytes
+  if (file.size > maxSize) {
+    setVideoError("Video size exceeds 15MB limit");
+    return false;
+  }
 
+  // Check file type
+  const allowedTypes = ["video/mp4"];
+  if (!allowedTypes.includes(file.type)) {
+    setVideoError("Only MP4 videos are allowed");
+    return false;
+  }
+
+  // Reset error if validation passes
+  setVideoError(null);
+  return true;
+};
+const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+
+    if (validateVideo(file)) {
+      setVideo(file);
+      if(document){
+//@ts-ignore
+      const videoElement = document.createElement("video");
+      videoElement.preload = "metadata";
+      videoElement.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(videoElement.src);
+        if (videoElement.duration > 10) {
+          setVideoError("Video duration exceeds 10 seconds limit");
+          setVideo(null);
+        } else if (videoElement.videoWidth !== 1920 || videoElement.videoHeight !== 1080) {
+          setVideoError("Video resolution must be 1920x1080 (1080p)");
+          setVideo(null);
+        }
+      };
+      videoElement.src = URL.createObjectURL(file);
+    }}
+  }
+};
 
   useEffect(() => {
     if(!videoUploaded)return;
 
       const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://gnome-separation-preferred-heel.trycloudflare.com/video", {
+      const res = await axios.get("https://sa-bargain-db-run.trycloudflare.com/video", {
         responseType: "blob",   // Changed from "blob" to "stream"
       });
 
@@ -121,6 +163,10 @@ useEffect(() => {
       toast.warn("Please fill in all required fields and upload necessary files.");
       return;
     }
+    if (videoError) {
+      toast.error(videoError);
+      return;
+    }
     toast.loading("Uploading Video")
     const formData = new FormData();
 
@@ -134,7 +180,7 @@ useEffect(() => {
     formData.append("document", document);
 
     try {
-      const response = await axios.post("https://gnome-separation-preferred-heel.trycloudflare.com/upload", formData, {
+      const response = await axios.post("https://sa-bargain-db-run.trycloudflare.com/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -255,7 +301,8 @@ setVideoUploaded(true);
                     - Aspect ratio 16:9 <br />- Landscape mode video <b>(Horizontal Layout)</b> <br />
                   </p>
                 </div>
-                <Input id="video" type="file" accept="video/*" onChange={(e) => setVideo(e.target.files?.[0] || null)} required />
+                <Input id="video" type="file" accept="video/mp4" onChange={handleVideoUpload} required />
+                {videoError && <p className="text-red-500 text-sm">{videoError}</p>}
               </div>
 
               <a ref={linkRef} style={{ display: "none" }}>
@@ -274,11 +321,11 @@ setVideoUploaded(true);
               <canvas ref={canvasRef} className="max-w-full h-auto bg-black border border-black" />
             </div>
           )}
-          {
-            videoUploaded &&
-
-<Link href="/video" className="underline text-blue-600">video </Link>
-          }
+          {videoUploaded && (
+            <Link href="/video" className="underline text-blue-600">
+              video{" "}
+            </Link>
+          )}
           {videoUploaded && (
             <video ref={videoRef} controls width="600">
               Your browser does not support the video tag.

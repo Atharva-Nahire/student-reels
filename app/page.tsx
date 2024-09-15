@@ -36,7 +36,7 @@ export default function LoginPage() {
 
     // Check if employeeId exists in the list of validEmployees (keys)
     if (employeeId && validEmployees.includes(employeeId)) {
-localStorage.setItem('employeeId', employeeId);
+      localStorage.setItem("employeeId", employeeId);
       router.push("/upload");
     } else {
       toast.error("Invalid Employee ID. Please try again.");
@@ -48,8 +48,8 @@ localStorage.setItem('employeeId', employeeId);
       <Card className="w-[400px] shadow-lg border-t-4 border-red-500">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <img src="/logo.png"/>
-             {/* <Stethoscope className="h-12 w-12 text-red-500" /> */}
+            <img src="/logo.png" />
+            {/* <Stethoscope className="h-12 w-12 text-red-500" /> */}
           </div>
           <CardTitle className="text-2xl font-bold text-center text-red-700">Employee Login</CardTitle>
           <CardDescription className="text-center text-gray-600">Enter your credentials to access the system</CardDescription>
