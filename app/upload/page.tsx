@@ -34,13 +34,14 @@ export default function UploadPage() {
 
   useEffect(() => {
     if(!videoUploaded)return;
-    const fetchVideo = async () => {
-      console.log("Fetching the video now");
-      const res = await axios.get("http://localhost:8000/video", {
-        responseType: "blob",
+
+      const fetchVideo = async () => {
+      toast.success("Fetching the transformed video");
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await axios.get("http://64.227.132.145:30008/video", {
+        responseType: "stream",   // Changed from "blob" to "stream"
       });
 
-      // Create a URL for the blob object and set it as the video source
       const videoURL = URL.createObjectURL(new Blob([res.data], { type: "video/mp4" }));
       if (videoRef.current) {
         videoRef.current.src = videoURL;
@@ -121,7 +122,7 @@ useEffect(() => {
       toast.warn("Please fill in all required fields and upload necessary files.");
       return;
     }
-
+    toast.loading("Uploading Video")
     const formData = new FormData();
 
     // Convert canvas to blob
@@ -134,13 +135,14 @@ useEffect(() => {
     formData.append("document", document);
 
     try {
-      const response = await axios.post("http://localhost:8000/upload", formData, {
+      const response = await axios.post("http://64.227.132.145:30008/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
       console.log(response.data);
+toast.dismiss();
       toast.success("video submitted successfully!");
 
       // Add data to Firestore
@@ -158,7 +160,7 @@ useEffect(() => {
 
       console.log("Document written with ID: ", docRef.id);
 
-console.log("fetching the video now")
+toast.success("fetching the new video");
 setVideoUploaded(true);
 
     } catch (error) {
