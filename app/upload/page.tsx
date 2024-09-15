@@ -36,8 +36,8 @@ export default function UploadPage() {
     if(!videoUploaded)return;
 
       const fetchVideo = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 12000));
       toast.success("Fetching the transformed video");
-      await new Promise((resolve) => setTimeout(resolve, 8000));
       const res = await axios.get("https://gnome-separation-preferred-heel.trycloudflare.com/video", {
         responseType: "blob",   // Changed from "blob" to "stream"
       });
@@ -162,7 +162,16 @@ toast.dismiss();
 
 toast.success("fetching the new video");
 setVideoUploaded(true);
-
+  // const clearFields = () => {
+    setDoctorName("");
+    setSpeciality("");
+    setHospitalName("");
+    setCity("");
+    setDocument(null);
+    setVideo(null);
+    setImage(null);
+    setVideoUploaded(false);
+  // };
     } catch (error) {
       console.error("Error uploading files:", error);
       toast.error("An error occurred while uploading files.");
