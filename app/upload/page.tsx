@@ -39,7 +39,7 @@ export default function UploadPage() {
       toast.success("Fetching the transformed video");
       await new Promise((resolve) => setTimeout(resolve, 8000));
       const res = await axios.get("https://gnome-separation-preferred-heel.trycloudflare.com/video", {
-        responseType: "stream",   // Changed from "blob" to "stream"
+        responseType: "blob",   // Changed from "blob" to "stream"
       });
 
       const videoURL = URL.createObjectURL(new Blob([res.data], { type: "video/mp4" }));
