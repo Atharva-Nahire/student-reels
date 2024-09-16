@@ -37,7 +37,7 @@ const uploadObject = async (file : File | Blob) => {
   try {
     // const toastId = toast.loading("Uploading Image");
     const data = await s3Client.send(new PutObjectCommand(params));
-    toast.dismiss(toastId);
+    // toast.dismiss(toastId);
     // toast.success("File Uploaded, do not close this page");
     const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.cdn.digitaloceanspaces.com/${params.Key}`;
     return { data, url: uploadedObjectUrl };
@@ -167,7 +167,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://pics-supplied-taking-tvs.trycloudflare.com/video", {
+      const res = await axios.get("https://patricia-tax-believe-danny.trycloudflare.com/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -276,7 +276,7 @@ export default function UploadPage() {
     });
 
     try {
-      const response = await axios.post("https://pics-supplied-taking-tvs.trycloudflare.com/upload", formData, {
+      const response = await axios.post("https://patricia-tax-believe-danny.trycloudflare.com/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
