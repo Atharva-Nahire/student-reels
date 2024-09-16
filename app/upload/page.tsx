@@ -76,12 +76,12 @@ export default function UploadPage() {
   const validateVideo = (file: File): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
       // Check file size (max 15MB)
-      const maxSize = 20 * 1024 * 1024; // 15MB in bytes
-      if (file.size > maxSize) {
-        setVideoError("Video size exceeds 20MB limit");
-        resolve(false);
-        return;
-      }
+      // const maxSize = 100 * 1024 * 1024; // 15MB in bytes
+      // if (file.size > maxSize) {
+      //   setVideoError("Video size exceeds 100MB limit");
+      //   resolve(false);
+      //   return;
+      // }
 
       // Check file type (only MP4 allowed)
       const allowedTypes = ["video/mp4"];
@@ -118,8 +118,8 @@ export default function UploadPage() {
           // }
 
           // Check duration (max 40 seconds)
-          if (video.duration > 40) {
-            setVideoError("Video duration exceeds 40 seconds limit");
+          if (video.duration > 60) {
+            setVideoError("Video duration exceeds 60 seconds limit");
             resolve(false);
             return;
           }
@@ -167,7 +167,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://patricia-tax-believe-danny.trycloudflare.com/video", {
+      const res = await axios.get("http://localhost:8000/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -276,7 +276,7 @@ export default function UploadPage() {
     });
 
     try {
-      const response = await axios.post("https://patricia-tax-believe-danny.trycloudflare.com/upload", formData, {
+      const response = await axios.post("http://localhost:8000/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -381,6 +381,7 @@ toast.dismiss();
                   <SelectContent>
                     <SelectItem value="cardiologist">Cardiologist</SelectItem>
                     <SelectItem value="interventional-cardiologist">Interventional Cardiologist</SelectItem>
+                    <SelectItem value="consulting-physician">Consulting Physician</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -411,12 +412,10 @@ toast.dismiss();
                   {/* - 1080p (1920x1080) <br /> */}
                   {/* - 30fps <br /> */}
                   <p>
-                    - max size 15MB <br />
-                    - max duration - <b>40 seconds</b> <br />
+                    - max size 100MB <br />- max duration - <b>60 seconds</b> <br />
                   </p>
                   <p>
-                    - Aspect ratio 16:9 <br />
-                    - Landscape mode video <b>(Horizontal Layout)</b> <br />
+                    - Aspect ratio 16:9 <br />- Landscape mode video <b>(Horizontal Layout)</b> <br />
                   </p>
                 </div>
                 <Input id="video" type="file" accept="video/mp4" onChange={handleVideoUpload} required />

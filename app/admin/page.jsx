@@ -94,7 +94,7 @@ export default function AdminPanel() {
         <div className="p-4">
           <h2 className="text-xl font-semibold">Admin Panel</h2>
         </div>
-        <nav className="mt-4">
+        <nav className="mt-4 flex flex-col">
           <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
             Dashboard
           </a>
@@ -145,8 +145,11 @@ export default function AdminPanel() {
                           <option name="interventional-cardiologist	" value="interventional-cardiologist	">
                             interventional-cardiologist
                           </option>
-                          <option name="cardiologist	" value="cardiologist	">
+                          <option name="cardiologist" value="cardiologist	">
                             cardiologist
+                          </option>
+                          <option name="consulting Physician" value="consulting-physician	">
+                            Consulting Physician
                           </option>
                         </select>
                       ) : (
