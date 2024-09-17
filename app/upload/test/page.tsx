@@ -41,7 +41,7 @@ const uploadObject = async (file: File | Blob) => {
     // toast.dismiss(toastId);
 
     toast.update(toastId, { render: "Upload complete", type: "success", isLoading: false });
-    const uploadedObjectUrl = `https://${params.Bucket}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.digitaloceanspaces.com/${params.Key}`;
+    const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.digitaloceanspaces.com/${params.Key}`;
     return { data, url: uploadedObjectUrl };
   } catch (err) {
     console.log("Error Uploading object", err);
