@@ -294,7 +294,7 @@ export default function UploadPage() {
       console.log(response.data);
       toast.dismiss();
       toast.success("video submitted successfully!");
-      const generatedUrl = response.data.url;
+      const generatedVideoUrl = response.data.url;
 
       // Add data to Firestore
       const docRef = await addDoc(collection(db, "employee-data"), {
