@@ -200,7 +200,7 @@ export default function AdminPanel() {
                           <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
                             Edit
                           </button>
-                          <button onClick={() => console.log("working")} className="bg-blue-500 text-white px-2 py-1 rounded">
+                          <button onClick={() => generateNewVideo()} className="bg-blue-500 text-white px-2 py-1 rounded">
                             Generate Video
                           </button>
                         </>

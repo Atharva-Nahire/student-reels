@@ -33,7 +33,8 @@ export default function AdminPanel() {
         where("doctorName", "<=", searchQuery + "\uf8ff"),
         where("generatedVideoUrl", "!=", null), // Only include submissions with 'generatedVideoUrl'
         orderBy("doctorName"),
-        limit(itemsPerPage)
+        limit(itemsPerPage),
+
       );
     } else {
       // Default query if there's no searchQuery
