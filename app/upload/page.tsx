@@ -15,7 +15,6 @@ import { db } from "@/config/firebase";
 import Link from "next/link";
 import { toast } from "react-toastify";
 
-
 const s3Client = new S3Client({
   endpoint: process.env.NEXT_PUBLIC_AWS_ENDPOINT,
   forcePathStyle: false,
@@ -26,7 +25,7 @@ const s3Client = new S3Client({
   },
 });
 
-const uploadObject = async (file : File | Blob) => {
+const uploadObject = async (file: File | Blob) => {
   const params = {
     Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
     Key: `submissions/${process.env.NEXT_PUBLIC_WHITE_LABEL_FOR}/${Date.now()}_${file.name}`,
@@ -61,17 +60,16 @@ export default function UploadPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const [videoError, setVideoError] = useState<string | null>(null);
-    const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-    // Ensure the code runs on the client side by setting isMounted to true
-    useEffect(() => {
-      setIsMounted(true);
-    }, []);
+  // Ensure the code runs on the client side by setting isMounted to true
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     drawImage();
   }, [image, doctorName, speciality, hospitalName, city]);
-
 
   const validateVideo = (file: File): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
@@ -118,7 +116,7 @@ export default function UploadPage() {
           // }
 
           // Check duration (max 40 seconds)
-          if (video.duration > 60) {
+          if (video.duration > 70) {
             setVideoError("Video duration exceeds 60 seconds limit");
             resolve(false);
             return;
@@ -152,13 +150,12 @@ export default function UploadPage() {
     });
   };
 
-
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
 
-      if (!validateVideo(file)) return
-        setVideo(file);
+      if (!validateVideo(file)) return;
+      setVideo(file);
     }
   };
 
@@ -167,7 +164,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("http://localhost:8000/video", {
+      const res = await axios.get("http://64.227.132.145:30008/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -264,7 +261,7 @@ export default function UploadPage() {
     // Convert canvas to blob
     const canvasBlob = await new Promise<Blob | null>((resolve) => canvasRef.current?.toBlob(resolve));
     if (canvasBlob) {
-    uploadObject(canvasBlob);
+      uploadObject(canvasBlob);
       formData.append("overlay", canvasBlob, "doctor_info.png");
     }
 
@@ -276,7 +273,7 @@ export default function UploadPage() {
     });
 
     try {
-      const response = await axios.post("http://localhost:8000/upload", formData, {
+      const response = await axios.post("http://64.227.132.145:30008/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -297,6 +294,7 @@ export default function UploadPage() {
       console.log(response.data);
       toast.dismiss();
       toast.success("video submitted successfully!");
+      const generatedUrl = response.data.url;
 
       // Add data to Firestore
       const docRef = await addDoc(collection(db, "employee-data"), {
@@ -305,7 +303,7 @@ export default function UploadPage() {
         hospitalName,
         city,
         employeeId,
-        // overlayUrl,
+        generatedUrl,
         // documentUrl,
         // videoUrl,
         timestamp: new Date(),
@@ -324,11 +322,11 @@ export default function UploadPage() {
       setVideo(null);
       setImage(null);
       setVideoUploaded(false);
-toast.dismiss();
+      toast.dismiss();
       // };
     } catch (error) {
       console.error("Error uploading files:", error);
-      toast.error("An error occurred while uploading files.",);
+      toast.error("An error occurred while uploading files.");
     }
   };
 
