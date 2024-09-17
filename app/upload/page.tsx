@@ -303,7 +303,7 @@ export default function UploadPage() {
         hospitalName,
         city,
         employeeId,
-        generatedUrl,
+        generatedVideoUrl,
         // documentUrl,
         // videoUrl,
         timestamp: new Date(),
