@@ -14,6 +14,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db } from "@/config/firebase";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { Upload } from "@aws-sdk/lib-storage";
 
 const s3Client = new S3Client({
   endpoint: process.env.NEXT_PUBLIC_AWS_ENDPOINT,
@@ -33,15 +34,18 @@ const uploadObject = async (file: File | Blob) => {
     ACL: "public-read",
   };
 
+    const toastId = toast.loading("Uploading");
   try {
-    // const toastId = toast.loading("Uploading Image");
     const data = await s3Client.send(new PutObjectCommand(params));
+
     // toast.dismiss(toastId);
-    // toast.success("File Uploaded, do not close this page");
-    const uploadedObjectUrl = `https://${params.Bucket}.${process.env.NEXT_PUBLIC_AWS_REGION}.cdn.digitaloceanspaces.com/${params.Key}`;
+
+    toast.update(toastId, { render: "Upload complete", type: "success", isLoading: false });
+    const uploadedObjectUrl = `https://${params.Bucket}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${params.Key}`;
     return { data, url: uploadedObjectUrl };
   } catch (err) {
     console.log("Error Uploading object", err);
+    toast.update(toastId, { render: "Error uploading file", type: "error", isLoading: false });
   }
 };
 
@@ -251,67 +255,74 @@ export default function UploadPage() {
       toast.error(videoError);
       return;
     }
-    // toast.loading("Uploading Video");
+    // const toastId = toast("Uploading Video", {
+    //   progress: 0,
+    //   autoClose: false, // Don't auto-close the toast
+    // });
+
     // toast.warn("Uploading to Cloud Storage");
 
-    uploadObject(video);
-    uploadObject(document);
+    let videoUploadUrl = await uploadObject(video);
+    videoUploadUrl = videoUploadUrl?.url;
+    console.log(videoUploadUrl);
+    // toast.loading("Uploading Document");
+    let documentUploadUrl = await uploadObject(document);
+    documentUploadUrl = documentUploadUrl?.url;
     const formData = new FormData();
+    let overlayUploadUrl;
 
     // Convert canvas to blob
     const canvasBlob = await new Promise<Blob | null>((resolve) => canvasRef.current?.toBlob(resolve));
     if (canvasBlob) {
-      uploadObject(canvasBlob);
+      overlayUploadUrl = await uploadObject(canvasBlob);
+    overlayUploadUrl = overlayUploadUrl?.url;
       formData.append("overlay", canvasBlob, "doctor_info.png");
     }
 
     formData.append("video", video);
     formData.append("document", document);
-    const toastId = toast("Uploading Video", {
-      progress: 0,
-      autoClose: false, // Don't auto-close the toast
-    });
 
     try {
-      const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          // toast.loading(progressPercentage +  "% video uploaded");
-          toast.update(toastId, {
-            progress: progressPercentage / 100, // Toast progress expects a value between 0 and 1
-            render: `Uploading Video (${progressPercentage}% complete)`, // Update the message dynamically
-          });
-        },
-      });
-      toast.update(toastId, {
-        render: "Upload Complete, do not refresh the page until the video processes", // Change the message to upload complete
-        //  type: toast.success, // Change the toast type to success
-        autoClose: 12000, // Set autoClose time to 3 seconds
-      });
-      console.log(response.data);
+      // const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
+      //   headers: {
+      //     "Content-Type": "multipart/form-data",
+      //   },
+      //   onUploadProgress: (progressEvent) => {
+      //     const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      //     // toast.loading(progressPercentage +  "% video uploaded");
+      //     toast.update(toastId, {
+      //       progress: progressPercentage / 100, // Toast progress expects a value between 0 and 1
+      //       render: `Uploading Video (${progressPercentage}% complete)`, // Update the message dynamically
+      //     });
+      //   },
+      // });
+      // toast.update(toastId, {
+      //   render: "Upload Complete, do not refresh the page until the video processes", // Change the message to upload complete
+      //   //  type: toast.success, // Change the toast type to success
+      //   autoClose: 12000, // Set autoClose time to 3 seconds
+      // });
+      // console.log(response.data);
       toast.dismiss();
       toast.success("video submitted successfully!");
-      toast.loading("Processing Video, do not close this window");
-      const generatedVideoUrl = response.data.url;
+      // toast.loading("Processing Video, do not close this window");
+      // const generatedVideoUrl = response.data.url;
 
       // Add data to Firestore
-      const docRef = await addDoc(collection(db, "employee-data"), {
+      const docRef = await addDoc(collection(db, "employee-test"), {
         doctorName,
         speciality,
         hospitalName,
         city,
         employeeId,
-        generatedVideoUrl,
-        // documentUrl,
+        // generatedVideoUrl,
+        videoUploadUrl,
+        documentUploadUrl,
         // videoUrl,
         timestamp: new Date(),
       });
 
       console.log("Document written with ID: ", docRef.id);
-      toast.success("Video Processing completed")
+      toast.success("Video Processing completed");
 
       // toast.success("fetching the new video");
       setVideoUploaded(true);
