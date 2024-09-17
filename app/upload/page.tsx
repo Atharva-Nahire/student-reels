@@ -15,6 +15,7 @@ import { db } from "@/config/firebase";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { Upload } from "@aws-sdk/lib-storage";
+import { useRouter } from "next/navigation";
 
 const s3Client = new S3Client({
   endpoint: process.env.NEXT_PUBLIC_AWS_ENDPOINT,
@@ -65,7 +66,7 @@ export default function UploadPage() {
 
   const [videoError, setVideoError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-
+const router = useRouter();
   // Ensure the code runs on the client side by setting isMounted to true
   useEffect(() => {
     setIsMounted(true);
@@ -302,7 +303,7 @@ export default function UploadPage() {
       //   autoClose: 12000, // Set autoClose time to 3 seconds
       // });
       // console.log(response.data);
-      toast.dismiss();
+      // toast.dismiss();
       toast.success("video submitted successfully!");
       // toast.loading("Processing Video, do not close this window");
       // const generatedVideoUrl = response.data.url;
@@ -322,6 +323,22 @@ export default function UploadPage() {
         timestamp: new Date(),
       });
 
+const queryString = encodeURIComponent(
+  JSON.stringify({
+    doctorName,
+    speciality,
+    hospitalName,
+    city,
+    employeeId,
+    // generatedVideoUrl,
+    videoUploadUrl,
+    documentUploadUrl,
+    overlayUploadUrl,
+    // videoUrl,
+    timestamp: new Date(),
+  })
+);
+router.push(`/preview?data=${queryString}`);
       console.log("Document written with ID: ", docRef.id);
       toast.success("Video Processing completed");
 
@@ -336,7 +353,7 @@ export default function UploadPage() {
       setVideo(null);
       setImage(null);
       setVideoUploaded(false);
- router.push("/new-page");
+      // router.push("/submitted-successfully");
       toast.dismiss();
       // };
     } catch (error) {
