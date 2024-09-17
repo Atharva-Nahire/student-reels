@@ -164,7 +164,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("http://64.227.132.145:30008/video", {
+      const res = await axios.get("https://heartday.hubscommunity.com/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -273,7 +273,7 @@ export default function UploadPage() {
     });
 
     try {
-      const response = await axios.post("http://64.227.132.145:30008/upload", formData, {
+      const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -294,6 +294,7 @@ export default function UploadPage() {
       console.log(response.data);
       toast.dismiss();
       toast.success("video submitted successfully!");
+      toast.loading("Processing Video, do not close this window");
       const generatedVideoUrl = response.data.url;
 
       // Add data to Firestore
@@ -310,8 +311,9 @@ export default function UploadPage() {
       });
 
       console.log("Document written with ID: ", docRef.id);
+      toast.success("Video Processing completed")
 
-      toast.success("fetching the new video");
+      // toast.success("fetching the new video");
       setVideoUploaded(true);
       // const clearFields = () => {
       setDoctorName("");
