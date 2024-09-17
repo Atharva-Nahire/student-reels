@@ -1,10 +1,11 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, startAfter, limit, getDocs, doc, updateDoc, where } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { db } from '@/config/firebase';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { db } from "@/config/firebase";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function AdminPanel() {
   const [submissions, setSubmissions] = useState([]);
@@ -15,6 +16,7 @@ export default function AdminPanel() {
   const [lastVisible, setLastVisible] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [previewContent, setPreviewContent] = useState(null);
 
   useEffect(() => {
     fetchSubmissions();
@@ -86,6 +88,10 @@ export default function AdminPanel() {
     setCurrentPage(currentPage - 1);
   };
 
+  const handlePreview = (content, type) => {
+    setPreviewContent({ url: content, type });
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <ToastContainer />
@@ -142,15 +148,9 @@ export default function AdminPanel() {
                     <td className="p-2">
                       {editingId === submission.id ? (
                         <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
-                          <option name="interventional-cardiologist	" value="interventional-cardiologist	">
-                            interventional-cardiologist
-                          </option>
-                          <option name="cardiologist" value="cardiologist	">
-                            cardiologist
-                          </option>
-                          <option name="consulting Physician" value="consulting-physician	">
-                            Consulting Physician
-                          </option>
+                          <option value="interventional-cardiologist">Interventional Cardiologist</option>
+                          <option value="cardiologist">Cardiologist</option>
+                          <option value="consulting-physician">Consulting Physician</option>
                         </select>
                       ) : (
                         submission.speciality
@@ -160,13 +160,34 @@ export default function AdminPanel() {
                     <td className="p-2">{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</td>
                     <td className="p-2">{submission.employeeId}</td>
                     <td className="p-2">
-                      <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-16 object-cover" />
+                      <Dialog>
+                        <DialogTrigger>
+                          <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-16 object-cover cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <img src={submission.overlayUploadUrl} alt="Overlay" className="w-full h-auto" />
+                        </DialogContent>
+                      </Dialog>
                     </td>
                     <td className="p-2">
-                      <img src={submission.documentUploadUrl} alt="Document" className="w-16 h-16 object-cover" />
+                      <Dialog>
+                        <DialogTrigger>
+                          <img src={submission.documentUploadUrl} alt="Document" className="w-16 h-16 object-cover cursor-pointer" onClick={() => handlePreview(submission.documentUploadUrl, "image")} />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <img src={submission.documentUploadUrl} alt="Document" className="w-full h-auto" />
+                        </DialogContent>
+                      </Dialog>
                     </td>
                     <td className="p-2">
-                      <video src={submission.videoUploadUrl} className="w-16 h-16" controls />
+                      <Dialog>
+                        <DialogTrigger>
+                          <video src={submission.videoUploadUrl} className="w-16 h-16 cursor-pointer" onClick={() => handlePreview(submission.videoUploadUrl, "video")} />
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <video src={submission.videoUploadUrl} className="w-full h-auto" controls />
+                        </DialogContent>
+                      </Dialog>
                     </td>
                     <td className="p-2">{formatDate(submission.timestamp)}</td>
                     <td className="p-2">
@@ -176,7 +197,7 @@ export default function AdminPanel() {
                         </button>
                       ) : (
                         <>
-                          <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded">
+                          <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
                             Edit
                           </button>
                           <button onClick={() => console.log("working")} className="bg-blue-500 text-white px-2 py-1 rounded">
