@@ -50,10 +50,10 @@ const uploadObject = async (file: File | Blob) => {
 };
 
 export default function UploadPage() {
-  const [doctorName, setDoctorName] = useState("");
-  const [speciality, setSpeciality] = useState("");
-  const [hospitalName, setHospitalName] = useState("");
-  const [city, setCity] = useState("");
+  const [doctorName, setDoctorName] = useState("test");
+  const [speciality, setSpeciality] = useState("cardiologist");
+  const [hospitalName, setHospitalName] = useState("jupiter");
+  const [city, setCity] = useState("Mumbai");
   const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);

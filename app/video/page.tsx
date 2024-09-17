@@ -26,12 +26,33 @@ export default function AdminPanel() {
     let q;
 
     if (searchQuery) {
-      q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
+      // Add a check to ensure that 'generatedVideoUrl' exists
+      q = query(
+        collection(db, "employee-data"),
+        where("doctorName", ">=", searchQuery),
+        where("doctorName", "<=", searchQuery + "\uf8ff"),
+        where("generatedVideoUrl", "!=", null), // Only include submissions with 'generatedVideoUrl'
+        orderBy("doctorName"),
+        limit(itemsPerPage)
+      );
     } else {
-      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
+      // Default query if there's no searchQuery
+      q = query(
+        collection(db, "employee-data"),
+        where("generatedVideoUrl", "!=", null), // Check for existence of 'generatedVideoUrl'
+        orderBy("timestamp", "desc"),
+        limit(itemsPerPage)
+      );
 
+      // Handle pagination for subsequent pages
       if (lastVisible && currentPage > 1) {
-        q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
+        q = query(
+          collection(db, "employee-data"),
+          where("generatedVideoUrl", "!=", null), // Check for existence of 'generatedVideoUrl'
+          orderBy("timestamp", "desc"),
+          startAfter(lastVisible),
+          limit(itemsPerPage)
+        );
       }
     }
 

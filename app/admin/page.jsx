@@ -160,13 +160,13 @@ export default function AdminPanel() {
                     <td className="p-2">{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</td>
                     <td className="p-2">{submission.employeeId}</td>
                     <td className="p-2">
-                      <img src={submission.overlayUrl} alt="Overlay" className="w-16 h-16 object-cover" />
+                      <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-16 object-cover" />
                     </td>
                     <td className="p-2">
-                      <img src={submission.documentUrl} alt="Document" className="w-16 h-16 object-cover" />
+                      <img src={submission.documentUploadUrl} alt="Document" className="w-16 h-16 object-cover" />
                     </td>
                     <td className="p-2">
-                      <video src={submission.videoUrl} className="w-16 h-16" controls />
+                      <video src={submission.videoUploadUrl} className="w-16 h-16" controls />
                     </td>
                     <td className="p-2">{formatDate(submission.timestamp)}</td>
                     <td className="p-2">
