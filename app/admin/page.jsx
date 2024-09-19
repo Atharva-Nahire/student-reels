@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import * as XLSX from "xlsx";
 
 function LoginForm({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -49,6 +49,7 @@ function LoginForm({ onLogin }) {
     </div>
   );
 }
+
 export default function AdminPanel() {
   const [submissions, setSubmissions] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -86,31 +87,22 @@ export default function AdminPanel() {
     }));
     setSubmissions(submissionsData);
     setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    setLoading(false);
+    setLoading(false);// ... (keep the existing fetchSubmissions function)
   };
 
   const handleEdit = (submission) => {
-    setEditingId(submission.id);
-    setEditForm(submission);
+    // ... (keep the existing handleEdit function)
   };
 
   const handleChange = (e) => {
-    setEditForm({
-      ...editForm,
-      [e.target.name]: e.target.value,
-    });
+   setEditForm({
+     ...editForm,
+     [e.target.name]: e.target.value,
+   }); // ... (keep the existing handleChange function)
   };
 
   const handleUpdate = async () => {
-    try {
-      const docRef = doc(db, "employee-data", editingId);
-      await updateDoc(docRef, editForm);
-      toast.success("Updated successfully!");
-      setEditingId(null);
-      fetchSubmissions();
-    } catch (error) {
-      toast.error("Update failed: " + error.message);
-    }
+    // ... (keep the existing handleUpdate function)
   };
 
   const formatDate = (timestamp) => {
@@ -118,55 +110,117 @@ export default function AdminPanel() {
   };
 
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
-    setLastVisible(null);
+      setSearchQuery(e.target.value);
+      setCurrentPage(1);
+      setLastVisible(null);// ... (keep the existing handleSearch function)
   };
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
+    // ... (keep the existing handleNextPage function)
   };
 
   const handlePrevPage = () => {
     setCurrentPage(currentPage - 1);
+    // ... (keep the existing handlePrevPage function)
   };
 
   const handlePreview = (content, type) => {
     setPreviewContent({ url: content, type });
+    // ... (keep the existing handlePreview function)
+  };
+
+  const generateNewVideo = async (submission) => {
+    // ... (keep the existing generateNewVideo function)
+  };
+
+  const downloadAsExcel = async () => {
+    try {
+      setLoading(true);
+      const allSubmissions = [];
+      let lastVisibleDoc = null;
+      let hasMore = true;
+
+      while (hasMore) {
+        let q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(100));
+        if (lastVisibleDoc) {
+          q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisibleDoc), limit(100));
+        }
+
+        const querySnapshot = await getDocs(q);
+        const submissionsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        allSubmissions.push(...submissionsData);
+
+        if (querySnapshot.docs.length < 100) {
+          hasMore = false;
+        } else {
+          lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+        }
+      }
+
+      // Convert timestamp to readable date
+      const formattedSubmissions = allSubmissions.map((submission) => ({
+        ...submission,
+        timestamp: formatDate(submission.timestamp),
+      }));
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(formattedSubmissions);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Submissions");
+
+      // Generate Excel file
+      XLSX.writeFile(wb, "employee_submissions.xlsx");
+
+      setLoading(false);
+      toast.success("Excel file downloaded successfully!");
+    } catch (error) {
+      setLoading(false);
+      toast.error("Error downloading Excel file: " + error.message);
+    }
   };
 
   return (
     <>
-      {isLoggedIn ?
-      <div className="flex h-screen bg-gray-100">
-        <ToastContainer />
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-md">
-          <div className="p-4">
-            <h2 className="text-xl font-semibold">Admin Panel</h2>
-          </div>
-          <nav className="mt-4 flex flex-col">
-            <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
-              Dashboard
-            </a>
-            <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
-              Submissions
-            </a>
-            <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
-              Settings
-            </a>
-          </nav>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-10 overflow-auto">
-          <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
-
-          {/* Search Input */}
-          <div className="mb-4">
-            <input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
+      {isLoggedIn ? (
+        <div className="flex h-screen bg-gray-100">
+          <ToastContainer />
+          {/* Sidebar */}
+          <div className="w-64 bg-white shadow-md">
+            <div className="p-4">
+              <h2 className="text-xl font-semibold">Admin Panel</h2>
+            </div>
+            <nav className="mt-4 flex flex-col">
+              <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
+                Dashboard
+              </a>
+              <a href="#" onClick={() => setIsLoggedIn(false)} className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
+                Logout
+              </a>
+            </nav>
           </div>
 
+          {/* Main Content */}
+          <div className="flex-1 p-10 overflow-auto">
+            <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
+
+            {/* Add Download Excel Button */}
+            <div className="mb-4 flex justify-between items-center">
+              <input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-1/2" />
+              <Button onClick={downloadAsExcel} disabled={loading}>
+                {loading ? "Processing..." : "Export to Excel"}
+              </Button>
+            </div>
+
+            {/* ... (keep the rest of the component as is) */}
+          {/* </div>
+          <div> */}
           {loading ? (
             <p>Loading...</p>
           ) : (
@@ -268,9 +322,11 @@ export default function AdminPanel() {
               </div>
             </>
           )}
+          </div>
         </div>
-      </div>
-      : <LoginForm  onLogin={() => setIsLoggedIn(true)}/>}
+      ) : (
+        <LoginForm onLogin={() => setIsLoggedIn(true)} />
+      )}
     </>
   );
 }
