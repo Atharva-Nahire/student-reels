@@ -237,7 +237,7 @@ export default function AdminPanel() {
                     <th className="text-left p-2">Document</th>
                     <th className="text-left p-2">Video</th>
                     <th className="text-left p-2">Timestamp</th>
-                    <th className="text-left p-2">Actions</th>
+                    {/* <th className="text-left p-2">Actions</th> */}
                   </tr>
                 </thead>
                 <tbody>
@@ -289,7 +289,7 @@ export default function AdminPanel() {
                         </Dialog>
                       </td>
                       <td className="p-2">{formatDate(submission.timestamp)}</td>
-                      <td className="p-2">
+                      {/* <td className="p-2">
                         {editingId === submission.id ? (
                           <button onClick={handleUpdate} className="bg-green-500 text-white px-2 py-1 rounded">
                             Save
@@ -304,7 +304,7 @@ export default function AdminPanel() {
                             </button>
                           </>
                         )}
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
