@@ -233,7 +233,7 @@ export default function AdminPanel() {
                     <th className="text-left p-2">Hospital</th>
                     <th className="text-left p-2">City</th>
                     <th className="text-left p-2">Employee ID</th>
-                    <th className="text-left p-2">Overlay</th>
+                    <th className="text-left p-2">Template</th>
                     <th className="text-left p-2">Document</th>
                     <th className="text-left p-2">Video</th>
                     <th className="text-left p-2">Timestamp</th>
