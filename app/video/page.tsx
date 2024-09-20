@@ -131,7 +131,7 @@ export default function AdminPanel() {
                 <div className="min-w-full bg-white grid grid-cols-1 md:grid-cols-3 gap-2">
                   {submissions.map((submission) => (
                     <Card key={submission.id} className="flex justify-center flex-col  ">
-                      {submission.generatedVideoUrl ? <video controls src={submission.generatedVideoUrl} className="py-2" /> : <div className="py-8 aspect-video text-center">Processing Video</div>}
+                      {submission.generatedVideoUrl ? <video controls src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="py-2" /> : <div className="py-8 aspect-video text-center">Processing Video</div>}
                       <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1 font-bold text-xl" /> : " Dr. " + submission.doctorName}</p>
                       <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</p>
                       <p className="text-sm pl-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.city}</p>
