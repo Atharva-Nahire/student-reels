@@ -138,6 +138,7 @@ export default function AdminPanel() {
   const generateNewVideo = async (submission) => {
     try {
       const toastId = toast.loading("Processing Video");
+      toast.loading("Please Wait for Video to be Processed!");
       const response = await axios.post(
         "https://heartday.hubscommunity.com/upload",
         {
@@ -156,12 +157,19 @@ export default function AdminPanel() {
         }
       );
 
+
+
       console.log(response.data);
       toast.dismiss();
-      toast.success("Video submitted successfully!");
 console.log(response.data.url, "the video url ---------------");
 
-      toast.success("Video Processing completed");
+      const docRef = doc(db, "employee-data", submission.id);
+      alert();
+      await updateDoc(docRef, {
+        generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
+      });
+
+      toast.success("Video Added to Gallery");
     } catch (error) {
       if (axios.isCancel(error)) {
         console.error("Request was cancelled");
