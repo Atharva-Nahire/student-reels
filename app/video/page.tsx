@@ -41,6 +41,7 @@ export default function AdminPanel() {
       q = query(
         collection(db, "employee-data"),
         where("generatedVideoUrl", "!=", null), // Check for existence of 'generatedVideoUrl'
+        orderBy("generatedVideoUrl"), // First orderBy should be on the same field as the inequality
         orderBy("timestamp", "desc"),
         limit(itemsPerPage)
       );

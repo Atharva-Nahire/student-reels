@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 function LoginForm({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -136,39 +137,41 @@ export default function AdminPanel() {
 
   const generateNewVideo = async (submission) => {
     try {
-      const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const toastId = toast.loading("Processing Video");
+      const response = await axios.post(
+        "https://heartday.hubscommunity.com/upload",
+        {
+          imageUrl: submission.overlayUploadUrl,
+          videoUrl: submission.videoUploadUrl,
         },
-        onUploadProgress: (progressEvent) => {
-          const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          // toast.loading(progressPercentage +  "% video uploaded");
-          toast.update(toastId, {
-            progress: progressPercentage / 100, // Toast progress expects a value between 0 and 1
-            render: `Processing (${progressPercentage}% complete)`, // Update the message dynamically
-          });
-        },
-      });
-      toast.update(toastId, {
-        render: "Upload Complete, do not refresh the page until the video processes", // Change the message to upload complete
-        //  type: toast.success, // Change the toast type to success
-        autoClose: 12000, // Set autoClose time to 3 seconds
-      });
+        {
+          timeout: 120000, // Set timeout to 120 seconds (120000 milliseconds)
+          onUploadProgress: (progressEvent) => {
+            const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            toast.update(toastId, {
+              progress: progressPercentage / 100,
+              render: `Processing (${progressPercentage}% complete)`,
+            });
+          },
+        }
+      );
+
       console.log(response.data);
       toast.dismiss();
-      toast.success("video submitted successfully!");
-
-      const docRef = doc(db, "employee-data", submission.id);
-      await updateDoc(docRef, {
-        generatedVideoUrl,
-      });
+      toast.success("Video submitted successfully!");
+console.log(response.data.url, "the video url ---------------");
 
       toast.success("Video Processing completed");
-
-      // };
     } catch (error) {
-      console.error("Error uploading files:", error);
-      toast.error("An error occurred while uploading files.");
+      if (axios.isCancel(error)) {
+        console.error("Request was cancelled");
+      } else if (error.code === "ECONNABORTED") {
+        console.error("Timeout occurred");
+        toast.error("The request timed out. Please try again.");
+      } else {
+        console.error("Error uploading files:", error);
+        toast.error("An error occurred while uploading files.");
+      }
     }
   };
 
@@ -216,8 +219,9 @@ export default function AdminPanel() {
                       <th className="text-left p-2">Overlay</th>
                       <th className="text-left p-2">Document</th>
                       <th className="text-left p-2">Video</th>
+                      <th className="text-left p-2">Generated</th>
                       <th className="text-left p-2">Timestamp</th>
-                      {/* <th className="text-left p-2">Actions</th> */}
+                      <th className="text-left p-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -268,8 +272,18 @@ export default function AdminPanel() {
                             </DialogContent>
                           </Dialog>
                         </td>
+                        <td className="p-2">
+                          <Dialog>
+                            <DialogTrigger>
+                              <video src={submission.generatedVideoUrl} className="w-16 h-16 cursor-pointer" onClick={() => handlePreview(submission.generatedVideoUrl, "video")} />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                              <video src={submission.generatedVideoUrl} className="w-full h-auto" controls />
+                            </DialogContent>
+                          </Dialog>
+                        </td>
                         <td className="p-2">{formatDate(submission.timestamp)}</td>
-                        {/* <td className="p-2">
+                        <td className="p-2">
                           {editingId === submission.id ? (
                             <button onClick={handleUpdate} className="bg-green-500 text-white px-2 py-1 rounded">
                               Save
@@ -284,7 +298,7 @@ export default function AdminPanel() {
                               </button>
                             </>
                           )}
-                        </td> */}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
