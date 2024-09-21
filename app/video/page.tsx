@@ -19,7 +19,22 @@ export default function AdminPanel() {
 
   useEffect(() => {
     fetchSubmissions();
+    countGeneratedVideos();
   }, [currentPage, searchQuery]);
+
+
+const countGeneratedVideos = async () => {
+  try {
+    const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
+    const querySnapshot = await getDocs(q);
+    const count = querySnapshot.docs.length;
+    console.log(`Number of entries with generatedVideoUrl: ${count}`);
+    return count;
+  } catch (error) {
+    console.error("Error counting generated videos:", error);
+    return null;
+  }
+};
 
   const fetchSubmissions = async () => {
     setLoading(true);
@@ -51,6 +66,7 @@ export default function AdminPanel() {
         q = query(
           collection(db, "employee-data"),
           where("generatedVideoUrl", "!=", null), // Check for existence of 'generatedVideoUrl'
+          orderBy("generatedVideoUrl"), // First orderBy should be on the same field as the inequality
           orderBy("timestamp", "desc"),
           startAfter(lastVisible),
           limit(itemsPerPage)
@@ -79,6 +95,8 @@ export default function AdminPanel() {
       [e.target.name]: e.target.value,
     });
   };
+
+
 
   const handleUpdate = async () => {
     try {

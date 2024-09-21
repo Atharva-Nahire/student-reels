@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, startAfter, limit, getDocs, doc, updateDoc, where } from "firebase/firestore";
+import { collection, query, orderBy, startAfter, limit, getDocs, doc, updateDoc, deleteDoc, where } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { db } from "@/config/firebase";
@@ -94,6 +94,16 @@ export default function AdminPanel() {
     setEditForm(submission);
   };
 
+  const handleDelete = async (submission) => {
+    //take submission.id and delete it
+    const docRef = doc(db, "employee-data", submission.id);
+    toast.warn("-----Data Deleted");
+
+    // Delete the document from Firestore
+    await deleteDoc(docRef);
+
+  }
+
   const handleChange = (e) => {
     setEditForm({
       ...editForm,
@@ -141,9 +151,11 @@ export default function AdminPanel() {
       toast.loading("Please Wait for Video to be Processed!");
       const response = await axios.post(
         "https://heartday.hubscommunity.com/upload",
+        // "http://localhost:8000/upload",
         {
           imageUrl: submission.overlayUploadUrl,
           videoUrl: submission.videoUploadUrl,
+          submissionId: submission.id
         },
         {
           timeout: 120000, // Set timeout to 120 seconds (120000 milliseconds)
@@ -163,11 +175,11 @@ export default function AdminPanel() {
       toast.dismiss();
 console.log(response.data.url, "the video url ---------------");
 
-      const docRef = doc(db, "employee-data", submission.id);
+      // const docRef = doc(db, "employee-data", submission.id);
       alert();
-      await updateDoc(docRef, {
-        generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
-      });
+      // await updateDoc(docRef, {
+      //   generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
+      // });
 
       toast.success("Video Added to Gallery");
     } catch (error) {
@@ -298,6 +310,9 @@ console.log(response.data.url, "the video url ---------------");
                             </button>
                           ) : (
                             <>
+                              <button onClick={() => handleDelete(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
+                                Delete
+                              </button>
                               <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
                                 Edit
                               </button>
