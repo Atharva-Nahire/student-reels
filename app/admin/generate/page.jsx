@@ -101,8 +101,7 @@ export default function AdminPanel() {
 
     // Delete the document from Firestore
     await deleteDoc(docRef);
-
-  }
+  };
 
   const handleChange = (e) => {
     setEditForm({
@@ -144,6 +143,14 @@ export default function AdminPanel() {
   const handlePreview = (content, type) => {
     setPreviewContent({ url: content, type });
   };
+  const unPublishNewVideo = async (submission) => {
+    toast.loading("Unpublishing Video");
+    const docRef = doc(db, "employee-data", submission.id);
+    await updateDoc(docRef, {
+      generatedVideoUrl: null,
+    });
+    toast.dismiss();
+  };
 
   const generateNewVideo = async (submission) => {
     try {
@@ -155,7 +162,7 @@ export default function AdminPanel() {
         {
           imageUrl: submission.overlayUploadUrl,
           videoUrl: submission.videoUploadUrl,
-          submissionId: submission.id
+          submissionId: submission.id,
         },
         {
           timeout: 120000, // Set timeout to 120 seconds (120000 milliseconds)
@@ -169,11 +176,9 @@ export default function AdminPanel() {
         }
       );
 
-
-
       console.log(response.data);
       toast.dismiss();
-console.log(response.data.url, "the video url ---------------");
+      console.log(response.data.url, "the video url ---------------");
 
       // const docRef = doc(db, "employee-data", submission.id);
       alert();
@@ -232,10 +237,7 @@ console.log(response.data.url, "the video url ---------------");
                   <thead>
                     <tr>
                       <th className="text-left p-2">Doctor Name</th>
-                      <th className="text-left p-2">Speciality</th>
-                      <th className="text-left p-2">Hospital</th>
-                      <th className="text-left p-2">City</th>
-                      <th className="text-left p-2">Employee ID</th>
+                      <th className="text-left p-2">EmpID</th>
                       <th className="text-left p-2">Overlay</th>
                       <th className="text-left p-2">Document</th>
                       <th className="text-left p-2">Video</th>
@@ -247,8 +249,11 @@ console.log(response.data.url, "the video url ---------------");
                   <tbody>
                     {submissions.map((submission) => (
                       <tr key={submission.id}>
-                        <td className="p-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</td>
-                        <td className="p-2">
+                        <td className="p-2 flex flex-col gap-1">
+                          <div>
+                          {editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}
+                          </div>
+                          <div>
                           {editingId === submission.id ? (
                             <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
                               <option value="interventional-cardiologist">Interventional Cardiologist</option>
@@ -258,14 +263,21 @@ console.log(response.data.url, "the video url ---------------");
                           ) : (
                             submission.speciality
                           )}
+                          </div>
+                          <br />
+                          <div>
+                          {editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}
+                          </div>
+                          <br />
+<div>
+                          {editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}
+</div>
                         </td>
-                        <td className="p-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</td>
-                        <td className="p-2">{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</td>
                         <td className="p-2">{submission.employeeId}</td>
-                        <td className="p-2">
+                        <td className="p-2 bg-black">
                           <Dialog>
                             <DialogTrigger>
-                              <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-16 object-cover cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
+                              <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-auto object-contain bg-black cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                               <img src={submission.overlayUploadUrl} alt="Overlay" className="w-full h-auto" />
@@ -309,17 +321,21 @@ console.log(response.data.url, "the video url ---------------");
                               Save
                             </button>
                           ) : (
-                            <>
-                              <button onClick={() => handleDelete(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
+                            <div className="flex flex-col gap-2">
+                              <button onClick={() => handleDelete(submission)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">
                                 Delete
                               </button>
                               <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
                                 Edit
                               </button>
                               <button onClick={() => generateNewVideo(submission)} className="bg-blue-500 text-white px-2 py-1 rounded">
-                                Publish Video
+                                Publish
                               </button>
-                            </>
+
+                              <button onClick={() => unPublishNewVideo(submission)} className="bg-blue-500 text-white px-2 py-1 rounded">
+                                UnPublish
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>

@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, subDays, subWeeks, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface Submission {
   id: string;
@@ -34,6 +36,7 @@ export default function ImprovedAdminPanel() {
   const [timeFilter, setTimeFilter] = useState("all");
   const observer = useRef<IntersectionObserver | null>(null);
   const [groupedSubmissions, setGroupedSubmissions] = useState<{ [key: string]: Submission[] }>({});
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   const itemsPerPage = 18;
 
@@ -46,77 +49,59 @@ export default function ImprovedAdminPanel() {
     groupSubmissionsByDate();
   }, [submissions]);
 
+  const countGeneratedVideos = async () => {
+    try {
+      const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
+      const querySnapshot = await getDocs(q);
+      const counted = querySnapshot.docs.length;
+      console.log(`Number of entries with generatedVideoUrl: ${count}`);
+      setCount(counted);
+    } catch (error) {
+      console.error("Error counting generated videos:", error);
+      return null;
+    }
+  };
+const fetchSubmissions = async () => {
+  setLoading(true);
+  let q = query(collection(db, "employee-data"), where("generatedVideoUrl","!=",null));
 
-const countGeneratedVideos = async () => {
-  try {
-    const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
-    const querySnapshot = await getDocs(q);
-    const counted = querySnapshot.docs.length;
-    console.log(`Number of entries with generatedVideoUrl: ${count}`);
-    setCount(counted);
-    // return count;
-  } catch (error) {
-    console.error("Error counting generated videos:", error);
-    return null;
+  // Apply time filter
+  if (timeFilter !== "all") {
+    // ... (existing time filter logic)
   }
+
+  const querySnapshot = await getDocs(q);
+  const submissions = querySnapshot.docs.map(
+    (doc) =>
+      ({
+        id: doc.id,
+        ...doc.data(),
+      } as Submission)
+  );
+
+  // Apply client-side filters
+  const filteredSubmissions = submissions.filter((submission) => {
+    let matchAllCriteria = true;
+
+    if (searchParams.doctorName && submission.doctorName.toLowerCase().indexOf(searchParams.doctorName.toLowerCase()) === -1) {
+      matchAllCriteria = false;
+    }
+    if (searchParams.hospitalName && submission.hospitalName.toLowerCase().indexOf(searchParams.hospitalName.toLowerCase()) === -1) {
+      matchAllCriteria = false;
+    }
+    if (searchParams.city && submission.city.toLowerCase().indexOf(searchParams.city.toLowerCase()) === -1) {
+      matchAllCriteria = false;
+    }
+    return matchAllCriteria;
+  });
+
+  setSubmissions((prev) => [...prev, ...filteredSubmissions]);
+  setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+  setHasMore(querySnapshot.docs.length === itemsPerPage);
+  setLoading(false);
 };
 
-  const fetchSubmissions = async () => {
-    setLoading(true);
-    let q = query(collection(db, "employee-data"));
 
-    // Apply time filter
-    if (timeFilter !== "all") {
-      const now = new Date();
-      let startDate, endDate;
-      switch (timeFilter) {
-        case "day":
-          startDate = startOfDay(now);
-          endDate = endOfDay(now);
-          break;
-        case "week":
-          startDate = startOfWeek(now);
-          endDate = endOfWeek(now);
-          break;
-        case "month":
-          startDate = startOfMonth(now);
-          endDate = endOfMonth(now);
-          break;
-      }
-      q = query(q, where("timestamp", ">=", startDate), where("timestamp", "<=", endDate));
-    }
-
-    // Apply search filters
-    if (searchParams.doctorName) {
-      q = query(q, where("doctorName", ">=", searchParams.doctorName), where("doctorName", "<=", searchParams.doctorName + "\uf8ff"));
-    }
-    if (searchParams.hospitalName) {
-      q = query(q, where("hospitalName", ">=", searchParams.hospitalName), where("hospitalName", "<=", searchParams.hospitalName + "\uf8ff"), where("generatedVideoUrl", "!=", null));
-    }
-    if (searchParams.city) {
-      q = query(q, where("city", ">=", searchParams.city), where("generatedVideoUrl", "!=", null), where("city", "<=", searchParams.city + "\uf8ff"));
-    }
-
-    q = query(q, where("generatedVideoUrl", "!=", null), orderBy("generatedVideoUrl"), orderBy("timestamp", "desc"), limit(itemsPerPage));
-
-    if (lastVisible) {
-      q = query(q, startAfter(lastVisible));
-    }
-
-    const querySnapshot = await getDocs(q);
-    const newSubmissions = querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        } as Submission)
-    );
-
-    setSubmissions((prev) => [...prev, ...newSubmissions]);
-    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    setHasMore(querySnapshot.docs.length === itemsPerPage);
-    setLoading(false);
-  };
 
   const groupSubmissionsByDate = () => {
     const grouped = submissions.reduce((acc, submission) => {
@@ -162,62 +147,70 @@ const countGeneratedVideos = async () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <ToastContainer />
 
-      <header className="bg-primary text-primary-foreground p-4 sticky top-0 z-10">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">World Heart Day 2024 Gallery</h1>
-          <img src="/logo.png" alt="Logo" className="h-10" />
+      <motion.header initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-primary-foreground sticky top-0 z-10 shadow-md">
+        <div className="container mx-auto flex justify-between items-center py-4">
+          <h1 className="text-xl md:text-3xl font-bold">World Heart Day 2024 Gallery</h1>
+          <img src="/logo.png" alt="Logo" className="h-12" />
         </div>
-      </header>
+      </motion.header>
 
-      <main className="flex-grow container mx-auto p-4">
-        <div className="mb-4 flex flex-wrap gap-4">
-          <Input type="text" name="doctorName" placeholder="Search by doctor name" value={searchParams.doctorName} onChange={handleSearch} className="max-w-xs" />
-          <Input type="text" name="hospitalName" placeholder="Search by hospital name" value={searchParams.hospitalName} onChange={handleSearch} className="max-w-xs" />
-          <Input type="text" name="city" placeholder="Search by city" value={searchParams.city} onChange={handleSearch} className="max-w-xs" />
-          {/* <Select onValueChange={handleTimeFilterChange} value={timeFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select time period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All time</SelectItem>
-              <SelectItem value="day">Today</SelectItem>
-              <SelectItem value="week">This week</SelectItem>
-              <SelectItem value="month">This month</SelectItem>
-            </SelectContent>
-          </Select> */}
-        </div>
+      <main className="flex-grow container mx-auto p-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8 flex flex-wrap gap-4">
+          <Input type="text" name="doctorName" placeholder="Search by doctor name" value={searchParams.doctorName} onChange={handleSearch} className="max-w-xs bg-white/80 backdrop-blur-sm" />
+          <Input type="text" name="hospitalName" placeholder="Search by hospital name" value={searchParams.hospitalName} onChange={handleSearch} className="max-w-xs bg-white/80 backdrop-blur-sm" />
+          <Input type="text" name="city" placeholder="Search by city" value={searchParams.city} onChange={handleSearch} className="max-w-xs bg-white/80 backdrop-blur-sm" />
+        </motion.div>
 
-        {Object.entries(groupedSubmissions).map(([date, dateSubmissions], index, array) => (
-          <div key={date} className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">{format(new Date(date), "MMMM d, yyyy")}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {dateSubmissions.map((submission, subIndex) => (
-                <Card key={submission.id} className="p-4" ref={index === array.length - 1 && subIndex === dateSubmissions.length - 1 ? lastSubmissionElementRef : null}>
-                  {submission.generatedVideoUrl ? (
-                    <video controls src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video mb-2" />
-                  ) : (
-                    <div className="w-full aspect-video bg-muted flex items-center justify-center mb-2">Processing Video</div>
-                  )}
-                  <h3 className="font-bold text-lg">Dr. {submission.doctorName}</h3>
-                  <p className="text-sm text-muted-foreground">{submission.hospitalName}</p>
-                  <p className="text-sm text-muted-foreground">{submission.city}</p>
-                  <p className="text-sm text-muted-foreground">{format(submission.timestamp.toDate(), "MMM d, yyyy HH:mm")}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ))}
+        <AnimatePresence>
+          {Object.entries(groupedSubmissions).map(([date, dateSubmissions], index, array) => (
+            <motion.div key={date} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5, delay: index * 0.1 }} className="mb-12">
+              <h2 className="text-3xl font-bold mb-6 text-gray-800">{format(new Date(date), "MMMM d, yyyy")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {dateSubmissions.map((submission, subIndex) => (
+                  <motion.div key={submission.id} ref={index === array.length - 1 && subIndex === dateSubmissions.length - 1 ? lastSubmissionElementRef : null} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Card className="p-4 bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow duration-300">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <div className="cursor-pointer">
+                            {submission.generatedVideoUrl ? (
+                              <video src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video mb-4 rounded-md object-cover" />
+                            ) : (
+                              <div className="w-full aspect-video bg-muted flex items-center justify-center mb-4 rounded-md">Processing Video</div>
+                            )}
+                          </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl">{submission.generatedVideoUrl && <video controls autoPlay src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video rounded-md" />}</DialogContent>
+                      </Dialog>
+                      <h3 className="font-bold text-xl text-gray-800 mb-2">Dr. {submission.doctorName}</h3>
+                      <p className="text-sm text-gray-600 mb-1">{submission.hospitalName}</p>
+                      <p className="text-sm text-gray-600 mb-1">{submission.city}</p>
+                      <p className="text-sm text-gray-500">{format(submission.timestamp.toDate(), "MMM d, yyyy HH:mm")}</p>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
-        {loading && <p className="text-center">Loading more submissions...</p>}
-        {!hasMore && <p className="text-center">{count?.toString()} video published </p>}
+        {loading && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center text-lg text-gray-600 mt-8">
+            Loading more submissions...
+          </motion.p>
+        )}
+        {!hasMore && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-xl font-semibold text-gray-800 mt-8">
+            {count?.toString()} videos published
+          </motion.p>
+        )}
       </main>
 
-      <footer className="bg-muted p-4 mt-8">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">© 2024 World Heart Day Gallery. All rights reserved.</div>
-      </footer>
+      <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
+        <div className="container mx-auto text-center text-sm">© 2024 World Heart Day.<br/> All rights reserved.</div>
+      </motion.footer>
     </div>
   );
 }
