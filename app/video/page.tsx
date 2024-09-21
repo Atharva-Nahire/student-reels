@@ -202,14 +202,19 @@ const fetchSubmissions = async () => {
           </motion.p>
         )}
         {!hasMore && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-xl font-semibold text-gray-800 mt-8">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center text-xl pb-10 font-semibold text-gray-800 mt-8">
             {count?.toString()} videos published
           </motion.p>
         )}
       </main>
 
       <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
-        <div className="container mx-auto text-center text-sm">© 2024 World Heart Day.<br/> All rights reserved.</div>
+        <div className="container mx-auto text-center text-sm">
+          © 2024 World Heart Day.
+          <br /> All rights reserved.
+          {count?.toString()} videos published
+          <br />
+        </div>
       </motion.footer>
     </div>
   );

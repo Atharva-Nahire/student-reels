@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+// import { debounce } from "lodash";
 
 function LoginForm({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -62,8 +63,48 @@ export default function AdminPanel() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   useEffect(() => {
-    fetchSubmissions();
+    if (searchQuery) {
+      debouncedFetchSubmissions(searchQuery);
+    } else {
+      fetchSubmissions(); // Call the original function when searchQuery is empty
+    }
   }, [currentPage, searchQuery]);
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func.apply(this, args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  const debouncedFetchSubmissions = debounce(async (searchQuery) => {
+    setLoading(true);
+    let q;
+
+    if (searchQuery) {
+      q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
+    } else {
+      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
+
+      if (lastVisible && currentPage > 1) {
+        q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
+      }
+    }
+
+    const querySnapshot = await getDocs(q);
+    const submissionsData = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setSubmissions(submissionsData);
+    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+    setLoading(false);
+  }, 8800);
 
   const fetchSubmissions = async () => {
     setLoading(true);
@@ -250,28 +291,22 @@ export default function AdminPanel() {
                     {submissions.map((submission) => (
                       <tr key={submission.id}>
                         <td className="p-2 flex flex-col gap-1">
+                          <div>{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</div>
                           <div>
-                          {editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}
-                          </div>
-                          <div>
-                          {editingId === submission.id ? (
-                            <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
-                              <option value="interventional-cardiologist">Interventional Cardiologist</option>
-                              <option value="cardiologist">Cardiologist</option>
-                              <option value="consulting-physician">Consulting Physician</option>
-                            </select>
-                          ) : (
-                            submission.speciality
-                          )}
+                            {editingId === submission.id ? (
+                              <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
+                                <option value="interventional-cardiologist">Interventional Cardiologist</option>
+                                <option value="cardiologist">Cardiologist</option>
+                                <option value="consulting-physician">Consulting Physician</option>
+                              </select>
+                            ) : (
+                              submission.speciality
+                            )}
                           </div>
                           <br />
-                          <div>
-                          {editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}
-                          </div>
+                          <div>{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</div>
                           <br />
-<div>
-                          {editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}
-</div>
+                          <div>{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</div>
                         </td>
                         <td className="p-2">{submission.employeeId}</td>
                         <td className="p-2 bg-black">
