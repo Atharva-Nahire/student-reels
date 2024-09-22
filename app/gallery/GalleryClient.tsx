@@ -3,13 +3,12 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { Timestamp } from "firebase/firestore"; // Import Firebase Timestamp if necessary
 
 interface Submission {
   id: string;
   doctorName: string;
   generatedVideoUrl: string;
-  timestamp: Timestamp; // Use Firebase Timestamp type
+  timestamp: Date;
 }
 
 interface GalleryClientProps {
