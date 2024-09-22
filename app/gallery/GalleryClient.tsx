@@ -3,57 +3,34 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+import { Timestamp } from "firebase/firestore"; // Import Firebase Timestamp if necessary
 
 interface Submission {
   id: string;
   doctorName: string;
   generatedVideoUrl: string;
-  timestamp: Date;
+  timestamp: Timestamp; // Use Firebase Timestamp type
 }
 
 interface GalleryClientProps {
-  submissions: { [key: string]: Submission[] };
+  submissions:  Submission[];
 }
 
 const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Filter submissions based on the search term
-  const filteredSubmissions = useMemo(() => {
-    if (!submissions || !searchTerm) return Object.values(submissions).flat();
-
-    const filteredDates = Object.keys(submissions).filter(
-      (date) =>
-        Array.isArray(submissions[date]) && // Ensure submissions[date] is an array
-        submissions[date].some((submission) =>
-          submission.doctorName.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
-
-    return filteredDates.flatMap((date) => submissions[date]);
-  }, [submissions, searchTerm]);
+const filteredSubmissions = submissions;
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Search doctors..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="border p-2 mb-4"
-      />
+      <input type="text" placeholder="Search doctors..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="border p-2 mb-4" />
 
       <AnimatePresence>
         {filteredSubmissions.length > 0 ? (
-          filteredSubmissions.map((submission, index) => (
-            <motion.div
-              key={submission.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+          filteredSubmissions.map((submission) => (
+            <motion.div key={submission.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <h3>{submission.doctorName}</h3>
               <video src={submission.generatedVideoUrl} controls />
+              <p>{format(submission.timestamp, "MMMM d, yyyy h:mm a")}</p> {/* Display formatted date */}
             </motion.div>
           ))
         ) : (
