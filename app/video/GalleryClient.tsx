@@ -78,18 +78,7 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
                 {groupedByDate[date].map((submission) => (
                   <motion.div key={submission.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="border rounded-lg shadow-md p-4">
                     {/* Fast video loading using thumbnail as poster */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <div className="cursor-pointer">
-                          {submission.generatedVideoUrl ? (
-                            <video src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video mb-4 rounded-md object-cover" />
-                          ) : (
-                            <div className="w-full aspect-video bg-muted flex items-center justify-center mb-4 rounded-md">Processing Video</div>
-                          )}
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl">{submission.generatedVideoUrl && <video controls autoPlay src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video rounded-md" />}</DialogContent>
-                    </Dialog>
+                    <VideoComponent submission={submission} />
 
                     <p className="font-semibold text-2xl">Dr. {submission.doctorName}</p>
                     <div className="flex gap-2 flex-col pt-4">
@@ -115,6 +104,23 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
 };
 
 export default GalleryClient;
+
+function VideoComponent({submission}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <div className="cursor-pointer">
+          {submission.generatedVideoUrl ? (
+            <video src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video mb-4 rounded-md object-cover" />
+          ) : (
+            <div className="w-full aspect-video bg-muted flex items-center justify-center mb-4 rounded-md">Processing Video</div>
+          )}
+        </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">{submission.generatedVideoUrl && <video controls autoPlay src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video rounded-md" />}</DialogContent>
+    </Dialog>
+  );
+}
 
 function Header() {
   return (
