@@ -151,12 +151,6 @@ const fetchSubmissions = async () => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <ToastContainer />
 
-      <motion.header initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-primary-foreground sticky top-0 z-10 shadow-md">
-        <div className="container mx-auto flex justify-between items-center py-4">
-          <h1 className="text-xl md:text-3xl font-bold">World Heart Day 2024 Gallery</h1>
-          <img src="/logo.png" alt="Logo" className="h-12" />
-        </div>
-      </motion.header>
 
       <main className="flex-grow container mx-auto p-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8 flex flex-wrap gap-4">
@@ -209,14 +203,6 @@ const fetchSubmissions = async () => {
         )}
       </main>
 
-      <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
-        <div className="container mx-auto text-center text-sm">
-          © 2024 World Heart Day.
-          <br /> All rights reserved.
-          {count?.toString()} videos published
-          <br />
-        </div>
-      </motion.footer>
     </div>
   );
 }

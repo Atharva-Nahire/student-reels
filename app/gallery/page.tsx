@@ -9,7 +9,7 @@ async function fetchSubmissions() {
   const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
   const querySnapshot = await getDocs(q);
 
-  const submissions = querySnapshot.docs.map((doc) => ({
+  const submissions: any = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     timestamp: doc.data().timestamp.toDate(),

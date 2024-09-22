@@ -15,6 +15,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+'display': ['Work Sans']
+      },
       colors: {
         natcored: "#F92C0A",
         natcoblue: "#0156ac",
