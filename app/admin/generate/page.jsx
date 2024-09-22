@@ -279,9 +279,8 @@ export default function AdminPanel() {
                     <tr>
                       <th className="text-left p-2">Doctor Name</th>
                       <th className="text-left p-2">EmpID</th>
-                      <th className="text-left p-2">Overlay</th>
+                      <th className="text-left p-2">Overlay with Video</th>
                       <th className="text-left p-2">Document</th>
-                      <th className="text-left p-2">Video</th>
                       <th className="text-left p-2">Generated</th>
                       <th className="text-left p-2">Timestamp</th>
                       <th className="text-left p-2">Actions</th>
@@ -312,7 +311,7 @@ export default function AdminPanel() {
                         <td className="p-2 bg-black">
                           <Dialog>
                             <DialogTrigger>
-                              <img src={submission.overlayUploadUrl} alt="Overlay" className="w-16 h-auto object-contain bg-black cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
+                                <img src={submission.overlayUploadUrl} alt="Overlay" className="w-8 h-16 aspect-video bg-black cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                               <img src={submission.overlayUploadUrl} alt="Overlay" className="w-full h-auto" />
