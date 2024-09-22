@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import Image from "next/image"; // Assuming you're using Next.js for image optimization
 import { Home, Hospital } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 interface Submission {
   id: string;
@@ -62,12 +63,7 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
 
   return (
     <div className="mx-auto font-display">
-      <motion.header initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-primary-foreground sticky top-0 z-10 shadow-md">
-        <div className="container mx-auto flex justify-between items-center py-4">
-          <h1 className="text-xl md:text-3xl font-bold">World Heart Day 2024 Gallery</h1>
-          <img src="/logo.png" alt="Logo" className="h-12" />
-        </div>
-      </motion.header>
+      <Header />
       <div className="text-center mb-4">
         <p className="text-gray-500">Total Submissions: {totalSubmissions}</p>
         <input type="text" placeholder="Search doctors..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="border p-2 mb-4 w-full sm:w-1/2" />
@@ -82,13 +78,18 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
                 {groupedByDate[date].map((submission) => (
                   <motion.div key={submission.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="border rounded-lg shadow-md p-4">
                     {/* Fast video loading using thumbnail as poster */}
-                    <video
-                      src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")}
-                      className="w-full aspect-video mb-4 rounded-md object-cover"
-                      // poster={submission.videoThumbnailUrl} // Poster for faster load
-                      controls
-                      // className="w-full h-48 object-cover mb-2"
-                    />
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="cursor-pointer">
+                          {submission.generatedVideoUrl ? (
+                            <video src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video mb-4 rounded-md object-cover" />
+                          ) : (
+                            <div className="w-full aspect-video bg-muted flex items-center justify-center mb-4 rounded-md">Processing Video</div>
+                          )}
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl">{submission.generatedVideoUrl && <video controls autoPlay src={submission.generatedVideoUrl.replaceAll(".nyc3", ".nyc3.cdn")} className="w-full aspect-video rounded-md" />}</DialogContent>
+                    </Dialog>
 
                     <p className="font-semibold text-2xl">Dr. {submission.doctorName}</p>
                     <div className="flex gap-2 flex-col pt-4">
@@ -107,22 +108,36 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
           <p>No submissions found matching the search criteria.</p>
         )}
       </AnimatePresence>
-<Pagination currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange}/>
-
-      <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
-        <div className="container mx-auto text-center text-sm">
-          © 2024 World Heart Day.
-          <br /> All rights reserved.
-          <br />
-        </div>
-      </motion.footer>
+      <Pagination currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} />
+      <Footer />
     </div>
   );
 };
 
 export default GalleryClient;
 
+function Header() {
+  return (
+    <motion.header initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-primary-foreground sticky top-0 z-10 shadow-md">
+      <div className="container mx-auto flex justify-between items-center py-4">
+        <h1 className="text-xl md:text-3xl font-bold">World Heart Day 2024 Gallery</h1>
+        <img src="/logo.png" alt="Logo" className="h-12" />
+      </div>
+    </motion.header>
+  );
+}
 
+function Footer() {
+  return (
+    <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
+      <div className="container mx-auto text-center text-sm">
+        © 2024 World Heart Day.
+        <br /> All rights reserved.
+        <br />
+      </div>
+    </motion.footer>
+  );
+}
 
 const Pagination = ({ currentPage, totalPages, handlePageChange }) => {
   const [customPage, setCustomPage] = useState("");
@@ -137,14 +152,6 @@ const Pagination = ({ currentPage, totalPages, handlePageChange }) => {
 
   return (
     <div className="flex flex-col items-center space-y-4 mt-6 mb-20">
-      {/* Custom Page Input */}
-      {/* <div className="flex items-center space-x-2">
-        <input type="number" placeholder="Go to page..." value={customPage} onChange={(e) => setCustomPage(e.target.value)} className="px-4 py-2 border rounded-lg text-center" min="1" max={totalPages} />
-        <button onClick={goToCustomPage} className="px-4 py-2 bg-green-500 text-white rounded-lg">
-          Go
-        </button>
-      </div> */}
-
       {/* Pagination Controls */}
       <div className="flex items-center space-x-2">
         {/* Start Page */}
@@ -202,5 +209,3 @@ const Pagination = ({ currentPage, totalPages, handlePageChange }) => {
     </div>
   );
 };
-
-
