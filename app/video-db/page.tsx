@@ -46,7 +46,6 @@ export default function ImprovedAdminPanel() {
   }, [timeFilter, searchParams]);
 
   useEffect(() => {
-    console.log(submissions)
     groupSubmissionsByDate();
   }, [submissions]);
 
@@ -62,47 +61,45 @@ export default function ImprovedAdminPanel() {
       return null;
     }
   };
-const fetchSubmissions = async () => {
-  setLoading(true);
-  let q = query(collection(db, "employee-data"), where("generatedVideoUrl","!=",null));
+  const fetchSubmissions = async () => {
+    setLoading(true);
+    let q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
 
-  // Apply time filter
-  if (timeFilter !== "all") {
-    // ... (existing time filter logic)
-  }
-
-  const querySnapshot = await getDocs(q);
-  const submissions = querySnapshot.docs.map(
-    (doc) =>
-      ({
-        id: doc.id,
-        ...doc.data(),
-      } as Submission)
-  );
-
-  // Apply client-side filters
-  const filteredSubmissions = submissions.filter((submission) => {
-    let matchAllCriteria = true;
-
-    if (searchParams.doctorName && submission.doctorName.toLowerCase().indexOf(searchParams.doctorName.toLowerCase()) === -1) {
-      matchAllCriteria = false;
+    // Apply time filter
+    if (timeFilter !== "all") {
+      // ... (existing time filter logic)
     }
-    if (searchParams.hospitalName && submission.hospitalName.toLowerCase().indexOf(searchParams.hospitalName.toLowerCase()) === -1) {
-      matchAllCriteria = false;
-    }
-    if (searchParams.city && submission.city.toLowerCase().indexOf(searchParams.city.toLowerCase()) === -1) {
-      matchAllCriteria = false;
-    }
-    return matchAllCriteria;
-  });
 
-  setSubmissions((prev) => [...prev, ...filteredSubmissions]);
-  setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-  setHasMore(querySnapshot.docs.length === itemsPerPage);
-  setLoading(false);
-};
+    const querySnapshot = await getDocs(q);
+    const submissions = querySnapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Submission)
+    );
 
+    // Apply client-side filters
+    const filteredSubmissions = submissions.filter((submission) => {
+      let matchAllCriteria = true;
 
+      if (searchParams.doctorName && submission.doctorName.toLowerCase().indexOf(searchParams.doctorName.toLowerCase()) === -1) {
+        matchAllCriteria = false;
+      }
+      if (searchParams.hospitalName && submission.hospitalName.toLowerCase().indexOf(searchParams.hospitalName.toLowerCase()) === -1) {
+        matchAllCriteria = false;
+      }
+      if (searchParams.city && submission.city.toLowerCase().indexOf(searchParams.city.toLowerCase()) === -1) {
+        matchAllCriteria = false;
+      }
+      return matchAllCriteria;
+    });
+
+    setSubmissions((prev) => [...prev, ...filteredSubmissions]);
+    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+    setHasMore(querySnapshot.docs.length === itemsPerPage);
+    setLoading(false);
+  };
 
   const groupSubmissionsByDate = () => {
     const grouped = submissions.reduce((acc, submission) => {
