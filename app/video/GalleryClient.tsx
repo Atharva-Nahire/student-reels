@@ -1,7 +1,7 @@
 //@ts-nocheck
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import Image from "next/image"; // Assuming you're using Next.js for image optimization
@@ -37,10 +37,25 @@ const GalleryClient: React.FC<GalleryClientProps> = ({ submissions }) => {
   const totalPages = Math.ceil(totalSubmissions / submissionsPerPage);
 
   const paginatedSubmissions = useMemo(() => {
+    // First, sort the filteredSubmissions by timestamp in descending order
+    const sortedSubmissions = [...filteredSubmissions].sort((a, b) => {
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    });
+
+    // Then apply pagination on the sorted submissions
     const startIndex = (currentPage - 1) * submissionsPerPage;
     const endIndex = startIndex + submissionsPerPage;
-    return filteredSubmissions.slice(startIndex, endIndex);
-  }, [filteredSubmissions, currentPage]);
+
+    return sortedSubmissions.slice(startIndex, endIndex);
+  }, [filteredSubmissions, currentPage, submissionsPerPage]);
+
+
+useEffect(() => {
+  if(searchTerm <= 0){
+    return;
+  }
+  setCurrentPage(1)
+}, [searchTerm]);
 
   // Group submissions by date
   const groupedByDate = useMemo(() => {
