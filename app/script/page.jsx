@@ -428,14 +428,14 @@ const ScriptPage = (props) => {
     // const [counter, setCounter] = useState(1);
   useEffect(() => {
     const uploadDataSequentially = async () => {
-        let counter = 2;
+        let counter = 5;
       while (counter < uploadData.length) {
         console.log(counter);
         await uploadDataRequest(uploadData[counter]);
         console.log("happening")
         counter++;
         // setCounter((prevCounter) => prevCounter + 1); // Increment the counter after each upload
-        await new Promise((resolve) => setTimeout(resolve, 30000)); // Wait for 30 seconds
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait for 30 seconds
       }
     };
 
@@ -446,7 +446,7 @@ const ScriptPage = (props) => {
     console.log("-------------");
     try {
       const uploadRequest = await axios.post("http://localhost:8000/upload", data, {
-        timeout: 120000,
+        timeout: 10000,
       });
       console.log(uploadRequest.data);
     } catch (error) {
