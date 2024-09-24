@@ -428,7 +428,7 @@ const ScriptPage = (props) => {
     // const [counter, setCounter] = useState(1);
   useEffect(() => {
     const uploadDataSequentially = async () => {
-        let counter = 5;
+        let counter = 68;
       while (counter < uploadData.length) {
         console.log(counter);
         await uploadDataRequest(uploadData[counter]);
