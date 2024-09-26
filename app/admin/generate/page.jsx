@@ -148,10 +148,11 @@ export default function AdminPanel() {
     setPreviewContent({ url: content, type });
   };
   const unPublishNewVideo = async (submission) => {
-    toast.loading("Unpublishing Video");
+    toast.loading("Reject Video");
     const docRef = doc(db, "employee-data", submission.id);
     await updateDoc(docRef, {
       generatedVideoUrl: null,
+      rejected: true
     });
     toast.dismiss();
   };
