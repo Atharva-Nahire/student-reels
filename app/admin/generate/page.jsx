@@ -1,97 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, startAfter, limit, getDocs, doc, updateDoc, deleteDoc, where } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { db } from "@/config/firebase";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SubmissionsTable from "./SubmissionsTable";
+import { listenToSubmissions } from "./firebaseservice";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import axios from "axios";
-// import { debounce } from "lodash";
 
 
 export default function AdminPanel() {
   const [submissions, setSubmissions] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [lastVisible, setLastVisible] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [lastVisible, setLastVisible] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [previewContent, setPreviewContent] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   useEffect(() => {
-    if (searchQuery) {
-      debouncedFetchSubmissions(searchQuery);
-    } else {
-      fetchSubmissions(); // Call the original function when searchQuery is empty
-    }
+    const unsubscribe = listenToSubmissions(searchQuery, lastVisible, itemsPerPage, currentPage, setSubmissions, setLastVisible, setLoading);
+    return () => unsubscribe(); // Clean up listener on component unmount
   }, [currentPage, searchQuery]);
 
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func.apply(this, args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  const debouncedFetchSubmissions = debounce(async (searchQuery) => {
-    setLoading(true);
-    let q;
-
-    if (searchQuery) {
-      q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
-    } else {
-      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
-
-      if (lastVisible && currentPage > 1) {
-        q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
-      }
-    }
-
-    const querySnapshot = await getDocs(q);
-    const submissionsData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setSubmissions(submissionsData);
-    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    setLoading(false);
-  }, 8800);
-
-  const fetchSubmissions = async () => {
-    setLoading(true);
-    let q;
-
-    if (searchQuery) {
-      q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
-    } else {
-      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
-
-      if (lastVisible && currentPage > 1) {
-        q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
-      }
-    }
-
-    const querySnapshot = await getDocs(q);
-    const submissionsData = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setSubmissions(submissionsData);
-    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-    setLoading(false);
-  };
 
   const handleEdit = (submission) => {
     setEditingId(submission.id);
@@ -99,35 +29,12 @@ export default function AdminPanel() {
   };
 
   const handleDelete = async (submission) => {
-    //take submission.id and delete it
     const docRef = doc(db, "employee-data", submission.id);
-    toast.warn("-----Data Deleted");
 
-    // Delete the document from Firestore
+    // Handle delete functionality
+    toast.warn("Data Deleted");
     await deleteDoc(docRef);
-  };
 
-  const handleChange = (e) => {
-    setEditForm({
-      ...editForm,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleUpdate = async () => {
-    try {
-      const docRef = doc(db, "employee-data", editingId);
-      await updateDoc(docRef, editForm);
-      toast.success("Updated successfully!");
-      setEditingId(null);
-      fetchSubmissions();
-    } catch (error) {
-      toast.error("Update failed: " + error.message);
-    }
-  };
-
-  const formatDate = (timestamp) => {
-    return new Date(timestamp.seconds * 1000).toLocaleString();
   };
 
   const handleSearch = (e) => {
@@ -135,229 +42,72 @@ export default function AdminPanel() {
     setCurrentPage(1);
     setLastVisible(null);
   };
+const unPublishNewVideo = async (submission) => {
+  toast.loading("Reject Video");
+  const docRef = doc(db, "employee-data", submission.id);
+  await updateDoc(docRef, {
+    generatedVideoUrl: null,
+    rejected: true,
+  });
+  toast.dismiss();
+};
 
-  const handleNextPage = () => {
-    setCurrentPage(currentPage + 1);
-  };
-
-  const handlePrevPage = () => {
-    setCurrentPage(currentPage - 1);
-  };
-
-  const handlePreview = (content, type) => {
-    setPreviewContent({ url: content, type });
-  };
-  const unPublishNewVideo = async (submission) => {
-    toast.loading("Reject Video");
-    const docRef = doc(db, "employee-data", submission.id);
-    await updateDoc(docRef, {
-      generatedVideoUrl: null,
-      rejected: true
-    });
-    toast.dismiss();
-  };
-
-  const generateNewVideo = async (submission) => {
-    try {
-      const toastId = toast.loading("Processing Video");
-      toast.loading("Please Wait for Video to be Processed!");
-      const response = await axios.post(
-        "https://heartday.hubscommunity.com/upload",
-        // "http://localhost:8000/upload",
-        {
-          imageUrl: submission.overlayUploadUrl,
-          videoUrl: submission.videoUploadUrl,
-          submissionId: submission.id,
+const generateNewVideo = async (submission) => {
+  try {
+    const toastId = toast.loading("Processing Video");
+    toast.loading("Please Wait for Video to be Processed!");
+    const response = await axios.post(
+      "https://heartday.hubscommunity.com/upload",
+      // "http://localhost:8000/upload",
+      {
+        imageUrl: submission.overlayUploadUrl,
+        videoUrl: submission.videoUploadUrl,
+        submissionId: submission.id,
+      },
+      {
+        timeout: 120000, // Set timeout to 120 seconds (120000 milliseconds)
+        onUploadProgress: (progressEvent) => {
+          const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          toast.update(toastId, {
+            progress: progressPercentage / 100,
+            render: `Processing (${progressPercentage}% complete)`,
+          });
         },
-        {
-          timeout: 120000, // Set timeout to 120 seconds (120000 milliseconds)
-          onUploadProgress: (progressEvent) => {
-            const progressPercentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            toast.update(toastId, {
-              progress: progressPercentage / 100,
-              render: `Processing (${progressPercentage}% complete)`,
-            });
-          },
-        }
-      );
-
-      console.log(response.data);
-      toast.dismiss();
-      console.log(response.data.url, "the video url ---------------");
-
-      // const docRef = doc(db, "employee-data", submission.id);
-      alert();
-      // await updateDoc(docRef, {
-      //   generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
-      // });
-
-      toast.success("Video Added to Gallery");
-    } catch (error) {
-      if (axios.isCancel(error)) {
-        console.error("Request was cancelled");
-      } else if (error.code === "ECONNABORTED") {
-        console.error("Timeout occurred");
-        toast.error("The request timed out. Please try again.");
-      } else {
-        console.error("Error uploading files:", error);
-        toast.error("An error occurred while uploading files.");
       }
+    );
+
+    console.log(response.data);
+    toast.dismiss();
+    console.log(response.data.url, "the video url ---------------");
+
+    // const docRef = doc(db, "employee-data", submission.id);
+    // alert();
+    // await updateDoc(docRef, {
+    //   generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
+    // });
+
+    toast.success("Video Added to Gallery");
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.error("Request was cancelled");
+    } else if (error.code === "ECONNABORTED") {
+      console.error("Timeout occurred");
+      toast.error("The request timed out. Please try again.");
+    } else {
+      console.error("Error uploading files:", error);
+      toast.error("An error occurred while uploading files.");
     }
-  };
+  }
+};
 
   return (
-    <>
-      {isLoggedIn ? (
-        <div className="flex h-screen bg-gray-100">
-          <ToastContainer />
-          {/* Sidebar */}
-          <div className="w-64 bg-white shadow-md">
-            <div className="p-4">
-              <h2 className="text-xl font-semibold">Admin Panel</h2>
-            </div>
-            <nav className="mt-4 flex flex-col">
-              <a href="#" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
-                Dashboard
-              </a>
-              <a href="/" className="block py-2 px-4 text-gray-700 hover:bg-gray-200">
-                Logout
-              </a>
-            </nav>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 p-10 overflow-auto">
-            <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
-
-            {/* Search Input */}
-            <div className="mb-4">
-              <input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
-            </div>
-
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <>
-                <table className="min-w-full bg-white">
-                  <thead>
-                    <tr>
-                      <th className="text-left p-2">Doctor Name</th>
-                      <th className="text-left p-2">EmpID</th>
-                      <th className="text-left p-2">Overlay with Video</th>
-                      <th className="text-left p-2">Document</th>
-                      <th className="text-left p-2">Generated</th>
-                      <th className="text-left p-2">Timestamp</th>
-                      <th className="text-left p-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submissions.map((submission) => (
-                      <tr key={submission.id}>
-                        <td className="p-2 flex flex-col gap-1">
-                          <div>{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</div>
-                          <div>
-                            {editingId === submission.id ? (
-                              <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
-                                <option value="interventional-cardiologist">Interventional Cardiologist</option>
-                                <option value="cardiologist">Cardiologist</option>
-                                <option value="consulting-physician">Consulting Physician</option>
-                              </select>
-                            ) : (
-                              submission.speciality
-                            )}
-                          </div>
-                          <br />
-                          <div>{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</div>
-                          <br />
-                          <div>{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</div>
-                        </td>
-                        <td className="p-2">{submission.employeeId}</td>
-                        <td className="p-2 bg-black">
-                          <Dialog>
-                            <DialogTrigger>
-                                <img src={submission.overlayUploadUrl} alt="Overlay" className="w-8 h-16 aspect-video bg-black cursor-pointer" onClick={() => handlePreview(submission.overlayUploadUrl, "image")} />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <img src={submission.overlayUploadUrl} alt="Overlay" className="w-full h-auto" />
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                        <td className="p-2">
-                          <Dialog>
-                            <DialogTrigger>
-                              <img src={submission.documentUploadUrl} alt="Document" className="w-16 h-16 object-cover cursor-pointer" onClick={() => handlePreview(submission.documentUploadUrl, "image")} />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <img src={submission.documentUploadUrl} alt="Document" className="w-full h-auto" />
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                        <td className="p-2">
-                          <Dialog>
-                            <DialogTrigger>
-                              <video src={submission.videoUploadUrl} className="w-16 h-16 cursor-pointer" onClick={() => handlePreview(submission.videoUploadUrl, "video")} />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <video src={submission.videoUploadUrl} className="w-full h-auto" controls />
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                        <td className="p-2">
-                          <Dialog>
-                            <DialogTrigger>
-                              <video src={submission.generatedVideoUrl} className="w-16 h-16 cursor-pointer" onClick={() => handlePreview(submission.generatedVideoUrl, "video")} />
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <video src={submission.generatedVideoUrl} className="w-full h-auto" controls />
-                            </DialogContent>
-                          </Dialog>
-                        </td>
-                        <td className="p-2">{formatDate(submission.timestamp)}</td>
-                        <td className="p-2">
-                          {editingId === submission.id ? (
-                            <button onClick={handleUpdate} className="bg-green-500 text-white px-2 py-1 rounded">
-                              Save
-                            </button>
-                          ) : (
-                            <div className="flex flex-col gap-2">
-                              <button onClick={() => handleDelete(submission)} className="bg-red-500 text-white px-2 py-1 rounded mr-2">
-                                Delete
-                              </button>
-                              <button onClick={() => handleEdit(submission)} className="bg-blue-500 text-white px-2 py-1 rounded mr-2">
-                                Edit
-                              </button>
-                              <button onClick={() => generateNewVideo(submission)} className="bg-blue-500 text-white px-2 py-1 rounded">
-                                Publish
-                              </button>
-
-                              <button onClick={() => unPublishNewVideo(submission)} className="bg-blue-500 text-white px-2 py-1 rounded">
-                                UnPublish
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Pagination Controls */}
-                <div className="mt-4 flex justify-between items-center">
-                  <button onClick={handlePrevPage} disabled={currentPage === 1} className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300">
-                    Previous
-                  </button>
-                  <span>Page {currentPage}</span>
-                  <button onClick={handleNextPage} disabled={submissions.length < itemsPerPage} className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300">
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      ) : (
-        <LoginForm onLogin={() => setIsLoggedIn(true)} />
-      )}
-    </>
+    <div className="flex h-screen bg-gray-100">
+      <ToastContainer />
+      <div className="flex-1 p-10 overflow-auto">
+        <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
+        <Input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
+        {loading ? <p>Loading...</p> : <SubmissionsTable submissions={submissions} handleEdit={handleEdit} handleDelete={handleDelete} handlePublish={generateNewVideo} handleUnpublish={unPublishNewVideo} />}
+      </div>
+    </div>
   );
 }
