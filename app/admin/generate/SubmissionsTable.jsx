@@ -6,7 +6,7 @@ const SubmissionsTable = ({ submissions, handleEdit, handleDelete, handlePublish
       <thead>
         <tr>
           <th className="text-left p-2">Volunteer Name</th>
-          <th className="text-left p-2">EmpID</th>
+          <th className="text-left p-2">EmployeeId</th>
           <th className="text-left p-2">Overlay with Video</th>
           <th className="text-left p-2">Document</th>
           <th className="text-left p-2">Generated</th>
@@ -22,7 +22,7 @@ const SubmissionsTable = ({ submissions, handleEdit, handleDelete, handlePublish
               <br />
               {submission.speciality}
             </td>
-            <td className="p-2">{submission.studentId}</td>
+            <td className="p-2">{submission.volunteerId}</td>
             <td className="p-2">
               <Dialog>
                 <DialogTrigger>
