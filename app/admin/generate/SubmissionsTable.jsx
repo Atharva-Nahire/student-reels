@@ -5,7 +5,7 @@ const SubmissionsTable = ({ submissions, handleEdit, handleDelete, handlePublish
     <table className="min-w-full bg-white">
       <thead>
         <tr>
-          <th className="text-left p-2">Volunteer Name</th>
+          <th className="text-left p-2">Student Name</th>
           <th className="text-left p-2">EmployeeId</th>
           <th className="text-left p-2">Overlay with Video</th>
           <th className="text-left p-2">Document</th>
@@ -18,7 +18,7 @@ const SubmissionsTable = ({ submissions, handleEdit, handleDelete, handlePublish
         {submissions.map((submission) => (
           <tr key={submission.id}>
             <td className="p-2">
-              {submission.volunteerName}
+              {submission.studentName}
               <br />
               {submission.speciality}
             </td>
