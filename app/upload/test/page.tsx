@@ -308,7 +308,7 @@ export default function UploadPage() {
       // const generatedVideoUrl = response.data.url;
 
       // Add data to Firestore
-      const docRef = await addDoc(collection(db, "employee-data"), {
+      const docRef = await addDoc(collection(db, "volunteer-data"), {
         doctorName,
         speciality,
         hospitalName,

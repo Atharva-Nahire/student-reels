@@ -51,7 +51,7 @@ export default function ImprovedAdminPanel() {
 
   const countGeneratedVideos = async () => {
     try {
-      const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
+      const q = query(collection(db, "volunteer-data"), where("generatedVideoUrl", "!=", null));
       const querySnapshot = await getDocs(q);
       const counted = querySnapshot.docs.length;
       console.log(`Number of entries with generatedVideoUrl: ${count}`);
@@ -63,7 +63,7 @@ export default function ImprovedAdminPanel() {
   };
   const fetchSubmissions = async () => {
     setLoading(true);
-    let q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
+    let q = query(collection(db, "volunteer-data"), where("generatedVideoUrl", "!=", null));
 
     // Apply time filter
     if (timeFilter !== "all") {

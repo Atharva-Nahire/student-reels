@@ -6,7 +6,7 @@ import GalleryClient from "./GalleryClient";
 
 // Fetch submissions from Firebase on the server side
 async function fetchSubmissions() {
-  const q = query(collection(db, "employee-data"), where("generatedVideoUrl", "!=", null));
+  const q = query(collection(db, "volunteer-data"), where("generatedVideoUrl", "!=", null));
   const querySnapshot = await getDocs(q);
 
   const submissions: any = querySnapshot.docs.map((doc) => ({
