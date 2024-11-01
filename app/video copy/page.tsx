@@ -94,7 +94,7 @@ export default function AdminPanel() {
       {/* Main Content */}
       <div className="text-xs md:text-2xl justify-around font-bold mb-4 h-20 bg-natcored text-white w-full text-center  flex items-center fixed ">
         <img src="/logo.png" />
-        World Heart Day 2024
+        Symbiosis Testimonials 2025 2024
       </div>
       <div className="flex-1 p-10 overflow-auto">
         <div className="h-20 w-full"></div>

@@ -141,7 +141,7 @@ function Header() {
   return (
     <motion.header initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-primary-foreground sticky top-0 z-10 shadow-md">
       <div className="container mx-auto flex justify-between items-center py-4">
-        <h1 className="text-xl md:text-3xl font-bold">World Heart Day 2024 Gallery</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Symbiosis Testimonials 2024-25 Graduates </h1>
         <img src="/logo.png" alt="Logo" className="h-12" />
       </div>
     </motion.header>
@@ -152,7 +152,7 @@ function Footer() {
   return (
     <motion.footer initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="bg-natcoblue text-white p-2 md:p-6 mt-12 fixed w-full bottom-0">
       <div className="container mx-auto text-center text-sm">
-        © 2024 World Heart Day.
+        © 2025 Symbiosis Testimonials 2025.
         <br /> All rights reserved.
         <br />
       </div>

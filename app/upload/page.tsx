@@ -52,8 +52,8 @@ const uploadObject = async (file: File | Blob) => {
 
 export default function UploadPage() {
   const [studentName, setStudentName] = useState("");
-  const [speciality, setSpeciality] = useState("");
-  const [hospitalName, setHospitalName] = useState("");
+  const [department, setDepartment] = useState("");
+  const [campusName, setCampusName] = useState("");
   const [city, setCity] = useState("");
   const [volunteerId, setVolunteerId] = useState<string | null>(null);
   const [document, setDocument] = useState<File | null>(null);
@@ -66,7 +66,7 @@ export default function UploadPage() {
 
   const [videoError, setVideoError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-const router = useRouter();
+  const router = useRouter();
   // Ensure the code runs on the client side by setting isMounted to true
   useEffect(() => {
     setIsMounted(true);
@@ -74,7 +74,7 @@ const router = useRouter();
 
   useEffect(() => {
     drawImage();
-  }, [image, studentName, speciality, hospitalName, city]);
+  }, [image, studentName, department, campusName, city]);
 
   const validateVideo = (file: File): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
@@ -207,11 +207,11 @@ const router = useRouter();
         ctx!.strokeStyle = "black";
         ctx!.lineWidth = 2;
 
-        ctx!.fillText("Dr. " + studentName, 150, canvas.height - 200);
+        ctx!.fillText(studentName, 150, canvas.height - 180);
         ctx!.textAlign = "start";
         ctx!.font = "42px Fontwax";
-        ctx!.fillText(speciality.toUpperCase().replaceAll("-", " "), 150, canvas.height - 130);
-        ctx!.fillText(hospitalName, 150, canvas.height - 90);
+        ctx!.fillText(department.replaceAll("-", " "), 150, canvas.height - 130);
+        ctx!.fillText(campusName, 150, canvas.height - 90);
         ctx!.fillText(city, 150, canvas.height - 50);
       };
 
@@ -247,9 +247,10 @@ const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    9;
 
     if (!canvasRef.current || !document || !video) {
-      toast.warn("Please fill in all required fields and upload necessary files.");
+      toast.warn("Please fill in all required fields and  necessary files.");
       return;
     }
     if (videoError) {
@@ -267,8 +268,6 @@ const router = useRouter();
     videoUploadUrl = videoUploadUrl?.url;
     console.log(videoUploadUrl);
     // toast.loading("Uploading Document");
-    let documentUploadUrl = await uploadObject(document);
-    documentUploadUrl = documentUploadUrl?.url;
     const formData = new FormData();
     let overlayUploadUrl;
 
@@ -311,34 +310,34 @@ const router = useRouter();
       // Add data to Firestore
       const docRef = await addDoc(collection(db, "volunteer-data"), {
         studentName,
-        speciality,
-        hospitalName,
+        department,
+        campusName,
         city,
         volunteerId,
         // generatedVideoUrl,
         videoUploadUrl,
-        documentUploadUrl,
+        document,
         overlayUploadUrl,
         // videoUrl,
         timestamp: new Date(),
       });
 
-const queryString = encodeURIComponent(
-  JSON.stringify({
-    studentName,
-    speciality,
-    hospitalName,
-    city,
-    volunteerId,
-    // generatedVideoUrl,
-    videoUploadUrl,
-    documentUploadUrl,
-    overlayUploadUrl,
-    // videoUrl,
-    timestamp: new Date(),
-  })
-);
-router.push(`/preview?data=${queryString}`);
+      const queryString = encodeURIComponent(
+        JSON.stringify({
+          studentName,
+          department,
+          campusName,
+          city,
+          volunteerId,
+          // generatedVideoUrl,
+          videoUploadUrl,
+          document,
+          overlayUploadUrl,
+          // videoUrl,
+          timestamp: new Date(),
+        })
+      );
+      router.push(`/preview?data=${queryString}`);
       console.log("Document written with ID: ", docRef.id);
       toast.success("Video Processing completed");
 
@@ -346,8 +345,8 @@ router.push(`/preview?data=${queryString}`);
       setVideoUploaded(true);
       // const clearFields = () => {
       setStudentName("");
-      setSpeciality("");
-      setHospitalName("");
+      setDepartment("");
+      setCampusName("");
       setCity("");
       setDocument(null);
       setVideo(null);
@@ -396,30 +395,43 @@ router.push(`/preview?data=${queryString}`);
                   Student Name
                 </label>
                 <div className="flex justify-start gap-4">
-                  <p>Dr. </p>
                   <Input id="studentName" value={studentName ? `${studentName}` : ""} onChange={(e) => setStudentName(e.target.value)} required />
                 </div>
               </div>
               <div className="space-y-2">
-                <label htmlFor="speciality" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Speciality
+                <label htmlFor="department" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Department
                 </label>
-                <Select onValueChange={setSpeciality} required>
+                <Select onValueChange={setDepartment} required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select speciality" />
+                    <SelectValue placeholder="Select department" />
                   </SelectTrigger>
+
                   <SelectContent>
-                    <SelectItem value="cardiologist">Cardiologist</SelectItem>
-                    <SelectItem value="interventional-cardiologist">Interventional Cardiologist</SelectItem>
-                    <SelectItem value="consulting-physician">Consulting Physician</SelectItem>
+                    <SelectItem value="computer-science">Computer Science</SelectItem>
+                    <SelectItem value="robotics-automation">Robotics Automation</SelectItem>
+                    <SelectItem value="mechanical">Mechanical</SelectItem>
+                    <SelectItem value="civil">Civil</SelectItem>
+                    <SelectItem value="EnTC">EnTC</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <label htmlFor="hospitalName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Hospital Name
+                <label htmlFor="campusName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Campus Name
                 </label>
-                <Input id="hospitalName" value={hospitalName} onChange={(e) => setHospitalName(e.target.value)} required />
+
+                <Select onValueChange={setCampusName} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Campus" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="Symbiosis Institute of Technology">Symbiosis Institute of Technology</SelectItem>
+                    <SelectItem value="Symbiosis Law School">Symbiosis Law School</SelectItem>
+                    <SelectItem value="Symbiosis School of Culinary Arts">Symbiosis School of Culinary Arts</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <label htmlFor="city" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -429,9 +441,9 @@ router.push(`/preview?data=${queryString}`);
               </div>
               <div className="space-y-2">
                 <label htmlFor="document" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Upload Document (Visiting Card / Prescription)
+                  Enter Student PRN
                 </label>
-                <Input id="document" type="file" accept="image/*" onChange={(e) => setDocument(e.target.files?.[0] || null)} required />
+                <Input id="document" value={document} onChange={(e) => setDocument(e.target.value)} required />
               </div>
               <div className="space-y-2 pt-4">
                 <label htmlFor="video" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
