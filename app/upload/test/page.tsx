@@ -168,7 +168,7 @@ export default function UploadPage() {
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://heartday.hubscommunity.com/video", {
+      const res = await axios.get("http://localhost:8000/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -283,7 +283,7 @@ export default function UploadPage() {
     formData.append("document", document);
 
     try {
-      // const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
+      // const response = await axios.post("http://localhost:8000/upload", formData, {
       //   headers: {
       //     "Content-Type": "multipart/form-data",
       //   },

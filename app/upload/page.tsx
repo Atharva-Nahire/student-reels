@@ -169,7 +169,7 @@ const router = useRouter();
 
     const fetchVideo = async () => {
       toast.success("Fetching the transformed video");
-      const res = await axios.get("https://heartday.hubscommunity.com/video", {
+      const res = await axios.get("http://localhost:8000/video", {
         responseType: "blob", // Changed from "blob" to "stream"
       });
 
@@ -284,7 +284,7 @@ const router = useRouter();
     formData.append("document", document);
 
     try {
-      // const response = await axios.post("https://heartday.hubscommunity.com/upload", formData, {
+      // const response = await axios.post("http://localhost:8000/upload", formData, {
       //   headers: {
       //     "Content-Type": "multipart/form-data",
       //   },
@@ -386,7 +386,7 @@ router.push(`/preview?data=${queryString}`);
       <div className="container text-natcoblue mx-auto p-4 w-full flex flex-col md:flex-row">
         <Card className=" max-w-full mx-auto md:w-1/2">
           <CardHeader>
-            <CardTitle className="text-natcoblue">Upload Doctor Information</CardTitle>
+            <CardTitle className="text-natcoblue">Upload Doctor Name</CardTitle>
             <CardDescription>Please fill in the doctor's details and upload required files</CardDescription>
           </CardHeader>
           <CardContent>

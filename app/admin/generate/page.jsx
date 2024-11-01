@@ -57,7 +57,7 @@ const generateNewVideo = async (submission) => {
     const toastId = toast.loading("Processing Video");
     toast.loading("Please Wait for Video to be Processed!");
     const response = await axios.post(
-      "https://heartday.hubscommunity.com/upload",
+      "http://localhost:8000/upload",
       // "http://localhost:8000/upload",
       {
         imageUrl: submission.overlayUploadUrl,

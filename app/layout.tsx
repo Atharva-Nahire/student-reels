@@ -12,6 +12,7 @@ const RootLayout: FC = ({ children }) => {
         <head></head>
         <body>
           <ToastContainer />
+          
           <div className="">
             <div className="min-h-screen">{children}</div>
           </div>
