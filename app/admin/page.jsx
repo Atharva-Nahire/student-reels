@@ -71,12 +71,12 @@ export default function AdminPanel() {
     let q;
 
     if (searchQuery) {
-      q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
+      q = query(collection(db, "volunteer-data"), where("studentName", ">=", searchQuery), where("studentName", "<=", searchQuery + "\uf8ff"), orderBy("studentName"), limit(itemsPerPage));
     } else {
-      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
+      q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
 
       if (lastVisible && currentPage > 1) {
-        q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
+        q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
       }
     }
 
@@ -142,9 +142,9 @@ export default function AdminPanel() {
       let hasMore = true;
 
       while (hasMore) {
-        let q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(100));
+        let q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), limit(100));
         if (lastVisibleDoc) {
-          q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisibleDoc), limit(100));
+          q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), startAfter(lastVisibleDoc), limit(100));
         }
 
         const querySnapshot = await getDocs(q);
@@ -176,7 +176,7 @@ export default function AdminPanel() {
       XLSX.utils.book_append_sheet(wb, ws, "Submissions");
 
       // Generate Excel file
-      XLSX.writeFile(wb, "employee_submissions.xlsx");
+      XLSX.writeFile(wb, "volunteer_submissions.xlsx");
 
       setLoading(false);
       toast.success("Excel file downloaded successfully!");
@@ -208,11 +208,11 @@ export default function AdminPanel() {
 
           {/* Main Content */}
           <div className="flex-1 p-10 overflow-auto">
-            <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
+            <h1 className="text-2xl font-bold mb-4">Volunteer Submissions</h1>
 
             {/* Add Download Excel Button */}
             <div className="mb-4 flex justify-between items-center">
-              <input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-1/2" />
+              <input type="text" placeholder="Search by student name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-1/2" />
               <Button onClick={downloadAsExcel} disabled={loading}>
                 {loading ? "Processing..." : "Export to Excel"}
               </Button>
@@ -228,11 +228,11 @@ export default function AdminPanel() {
               <table className="min-w-full bg-white">
                 <thead>
                   <tr>
-                    <th className="text-left p-2">Doctor Name</th>
-                    <th className="text-left p-2">Speciality</th>
-                    <th className="text-left p-2">Hospital</th>
+                    <th className="text-left p-2">Student Name</th>
+                    <th className="text-left p-2">Department</th>
+                    <th className="text-left p-2">Campus</th>
                     <th className="text-left p-2">City</th>
-                    <th className="text-left p-2">Employee ID</th>
+                    <th className="text-left p-2">Volunteer ID</th>
                     <th className="text-left p-2">Template</th>
                     <th className="text-left p-2">Document</th>
                     <th className="text-left p-2">Video</th>
@@ -243,21 +243,21 @@ export default function AdminPanel() {
                 <tbody>
                   {submissions.map((submission) => (
                     <tr key={submission.id}>
-                      <td className="p-2">{editingId === submission.id ? <input type="text" name="doctorName" value={editForm.doctorName} onChange={handleChange} className="border p-1" /> : submission.doctorName}</td>
+                      <td className="p-2">{editingId === submission.id ? <input type="text" name="studentName" value={editForm.studentName} onChange={handleChange} className="border p-1" /> : submission.studentName}</td>
                       <td className="p-2">
                         {editingId === submission.id ? (
-                          <select onChange={handleChange} name="speciality" value={editForm.speciality} required>
+                          <select onChange={handleChange} name="department" value={editForm.department} required>
                             <option value="interventional-cardiologist">Interventional Cardiologist</option>
                             <option value="cardiologist">Cardiologist</option>
                             <option value="consulting-physician">Consulting Physician</option>
                           </select>
                         ) : (
-                          submission.speciality
+                          submission.department
                         )}
                       </td>
-                      <td className="p-2">{editingId === submission.id ? <input type="text" name="hospitalName" value={editForm.hospitalName} onChange={handleChange} className="border p-1" /> : submission.hospitalName}</td>
+                      <td className="p-2">{editingId === submission.id ? <input type="text" name="campusName" value={editForm.campusName} onChange={handleChange} className="border p-1" /> : submission.campusName}</td>
                       <td className="p-2">{editingId === submission.id ? <input type="text" name="city" value={editForm.city} onChange={handleChange} className="border p-1" /> : submission.city}</td>
-                      <td className="p-2">{submission.employeeId}</td>
+                      <td className="p-2">{submission.volunteerId}</td>
                       <td className="p-2">
                         <Dialog>
                           <DialogTrigger>
@@ -269,14 +269,7 @@ export default function AdminPanel() {
                         </Dialog>
                       </td>
                       <td className="p-2">
-                        <Dialog>
-                          <DialogTrigger>
-                            <img src={submission.documentUploadUrl} alt="Document" className="w-16 h-16 object-cover cursor-pointer" onClick={() => handlePreview(submission.documentUploadUrl, "image")} />
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[425px]">
-                            <img src={submission.documentUploadUrl} alt="Document" className="w-full h-auto" />
-                          </DialogContent>
-                        </Dialog>
+                       {submission.document}
                       </td>
                       <td className="p-2">
                         <Dialog>

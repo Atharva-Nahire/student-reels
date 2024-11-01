@@ -29,7 +29,7 @@ export default function AdminPanel() {
   };
 
   const handleDelete = async (submission) => {
-    const docRef = doc(db, "employee-data", submission.id);
+    const docRef = doc(db, "volunteer-data", submission.id);
 
     // Handle delete functionality
     toast.warn("Data Deleted");
@@ -44,7 +44,7 @@ export default function AdminPanel() {
   };
 const unPublishNewVideo = async (submission) => {
   toast.loading("Reject Video");
-  const docRef = doc(db, "employee-data", submission.id);
+  const docRef = doc(db, "volunteer-data", submission.id);
   await updateDoc(docRef, {
     generatedVideoUrl: null,
     rejected: true,
@@ -80,7 +80,7 @@ const generateNewVideo = async (submission) => {
     toast.dismiss();
     console.log(response.data.url, "the video url ---------------");
 
-    // const docRef = doc(db, "employee-data", submission.id);
+    // const docRef = doc(db, "volunteer-data", submission.id);
     // alert();
     // await updateDoc(docRef, {
     //   generatedVideoUrl: response.data.url, // Assuming the API returns a generated video URL
@@ -104,8 +104,8 @@ const generateNewVideo = async (submission) => {
     <div className="flex h-screen bg-gray-100">
       <ToastContainer />
       <div className="flex-1 p-10 overflow-auto">
-        <h1 className="text-2xl font-bold mb-4">Employee Submissions</h1>
-        <Input type="text" placeholder="Search by doctor name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
+        <h1 className="text-2xl font-bold mb-4">Volunteer Submissions</h1>
+        <Input type="text" placeholder="Search by student name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
         {loading ? <p>Loading...</p> : <SubmissionsTable submissions={submissions} handleEdit={handleEdit} handleDelete={handleDelete} handlePublish={generateNewVideo} handleUnpublish={unPublishNewVideo} />}
       </div>
     </div>

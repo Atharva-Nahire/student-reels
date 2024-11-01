@@ -81,7 +81,7 @@ useEffect(() => {
       <Header />
       <div className="text-center mb-4">
         <p className="text-gray-500">Total Submissions: {totalSubmissions}</p>
-        <input type="text" placeholder="Search doctors..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="border p-2 mb-4 w-full sm:w-1/2" />
+        <input type="text" placeholder="Search Student Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="border p-2 mb-4 w-full sm:w-1/2" />
       </div>
 
       <AnimatePresence>
@@ -109,7 +109,9 @@ useEffect(() => {
             </div>
           ))
         ) : (
+          <>
           <p>No submissions found matching the search criteria.</p>
+          </>
         )}
       </AnimatePresence>
       <Pagination currentPage={currentPage} totalPages={totalPages} handlePageChange={handlePageChange} />
