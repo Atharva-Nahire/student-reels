@@ -104,8 +104,6 @@ const generateNewVideo = async (submission) => {
     <div className="flex h-screen bg-gray-100">
       <ToastContainer />
       <div className="flex-1 p-10 overflow-auto">
-        {submissions.toString()}
-        {JSON.stringify(submissions)}
         <h1 className="text-2xl font-bold mb-4">Volunteer Submissions</h1>
         <Input type="text" placeholder="Search by student name..." value={searchQuery} onChange={handleSearch} className="p-2 border rounded w-full" />
         {loading ? <p>Loading...</p> : <SubmissionsTable submissions={submissions} handleEdit={handleEdit} handleDelete={handleDelete} handlePublish={generateNewVideo} handleUnpublish={unPublishNewVideo} />}
