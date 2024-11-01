@@ -6,12 +6,12 @@ export const listenToSubmissions = (searchQuery, lastVisible, itemsPerPage, curr
   let q;
 
   if (searchQuery) {
-    q = query(collection(db, "employee-data"), where("doctorName", ">=", searchQuery), where("doctorName", "<=", searchQuery + "\uf8ff"), orderBy("doctorName"), limit(itemsPerPage));
+    q = query(collection(db, "volunteer-data"), where("studentName", ">=", searchQuery), where("studentName", "<=", searchQuery + "\uf8ff"), orderBy("studentName"), limit(itemsPerPage));
   } else {
-    q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
+    q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), limit(itemsPerPage));
 
     if (lastVisible && currentPage > 1) {
-      q = query(collection(db, "employee-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
+      q = query(collection(db, "volunteer-data"), orderBy("timestamp", "desc"), startAfter(lastVisible), limit(itemsPerPage));
     }
   }
 
