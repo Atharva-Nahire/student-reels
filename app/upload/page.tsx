@@ -51,11 +51,11 @@ const uploadObject = async (file: File | Blob) => {
 };
 
 export default function UploadPage() {
-  const [doctorName, setDoctorName] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [speciality, setSpeciality] = useState("");
   const [hospitalName, setHospitalName] = useState("");
   const [city, setCity] = useState("");
-  const [employeeId, setEmployeeId] = useState<string | null>(null);
+  const [volunteerId, setVolunteerId] = useState<string | null>(null);
   const [document, setDocument] = useState<File | null>(null);
   const [video, setVideo] = useState<File | null>(null);
   const [image, setImage] = useState<string | null>(null);
@@ -74,7 +74,7 @@ const router = useRouter();
 
   useEffect(() => {
     drawImage();
-  }, [image, doctorName, speciality, hospitalName, city]);
+  }, [image, studentName, speciality, hospitalName, city]);
 
   const validateVideo = (file: File): Promise<boolean> => {
     return new Promise<boolean>((resolve) => {
@@ -184,8 +184,8 @@ const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedEmployeeId = localStorage.getItem("employeeId");
-      setEmployeeId(storedEmployeeId);
+      const storedVolunteerId = localStorage.getItem("volunteerId");
+      setVolunteerId(storedVolunteerId);
     }
   }, []);
 
@@ -207,7 +207,7 @@ const router = useRouter();
         ctx!.strokeStyle = "black";
         ctx!.lineWidth = 2;
 
-        ctx!.fillText("Dr. " + doctorName, 150, canvas.height - 200);
+        ctx!.fillText("Dr. " + studentName, 150, canvas.height - 200);
         ctx!.textAlign = "start";
         ctx!.font = "42px Fontwax";
         ctx!.fillText(speciality.toUpperCase().replaceAll("-", " "), 150, canvas.height - 130);
@@ -238,7 +238,7 @@ const router = useRouter();
       const url = URL.createObjectURL(blob);
       if (linkRef.current) {
         linkRef.current.href = url;
-        linkRef.current.download = "doctor_info.png";
+        linkRef.current.download = "student_info.png";
         linkRef.current.click();
         URL.revokeObjectURL(url);
       }
@@ -277,7 +277,7 @@ const router = useRouter();
     if (canvasBlob) {
       overlayUploadUrl = await uploadObject(canvasBlob);
       overlayUploadUrl = overlayUploadUrl?.url;
-      formData.append("overlay", canvasBlob, "doctor_info.png");
+      formData.append("overlay", canvasBlob, "student_info.png");
     }
 
     formData.append("video", video);
@@ -309,12 +309,12 @@ const router = useRouter();
       // const generatedVideoUrl = response.data.url;
 
       // Add data to Firestore
-      const docRef = await addDoc(collection(db, "employee-data"), {
-        doctorName,
+      const docRef = await addDoc(collection(db, "volunteer-data"), {
+        studentName,
         speciality,
         hospitalName,
         city,
-        employeeId,
+        volunteerId,
         // generatedVideoUrl,
         videoUploadUrl,
         documentUploadUrl,
@@ -325,11 +325,11 @@ const router = useRouter();
 
 const queryString = encodeURIComponent(
   JSON.stringify({
-    doctorName,
+    studentName,
     speciality,
     hospitalName,
     city,
-    employeeId,
+    volunteerId,
     // generatedVideoUrl,
     videoUploadUrl,
     documentUploadUrl,
@@ -345,7 +345,7 @@ router.push(`/preview?data=${queryString}`);
       // toast.success("fetching the new video");
       setVideoUploaded(true);
       // const clearFields = () => {
-      setDoctorName("");
+      setStudentName("");
       setSpeciality("");
       setHospitalName("");
       setCity("");
@@ -379,25 +379,25 @@ router.push(`/preview?data=${queryString}`);
         </div>
       </div>
       <div className="container py-2">
-        EmployeeId: {employeeId}
+        VolunteerId: {volunteerId}
         <br />
-        {/* Name: {employeeId} */}
+        {/* Name: {volunteerId} */}
       </div>
       <div className="container text-natcoblue mx-auto p-4 w-full flex flex-col md:flex-row">
         <Card className=" max-w-full mx-auto md:w-1/2">
           <CardHeader>
-            <CardTitle className="text-natcoblue">Upload Doctor Name</CardTitle>
-            <CardDescription>Please fill in the doctor's details and upload required files</CardDescription>
+            <CardTitle className="text-natcoblue">Upload Student Name</CardTitle>
+            <CardDescription>Please fill in the student's details and upload required files</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="doctorName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Doctor Name
+                <label htmlFor="studentName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Student Name
                 </label>
                 <div className="flex justify-start gap-4">
                   <p>Dr. </p>
-                  <Input id="doctorName" value={doctorName ? `${doctorName}` : ""} onChange={(e) => setDoctorName(e.target.value)} required />
+                  <Input id="studentName" value={studentName ? `${studentName}` : ""} onChange={(e) => setStudentName(e.target.value)} required />
                 </div>
               </div>
               <div className="space-y-2">
@@ -435,7 +435,7 @@ router.push(`/preview?data=${queryString}`);
               </div>
               <div className="space-y-2 pt-4">
                 <label htmlFor="video" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Upload Doctor Video
+                  Upload Student Video
                 </label>
                 <div className="text-sm text-natcoblue py-4">
                   Recommended Video settings - MP4 (H.264) <br />
