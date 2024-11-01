@@ -9,37 +9,37 @@ import { Stethoscope, UserCircle } from "lucide-react";
 import { toast } from "react-toastify";
 
 export default function LoginPage() {
-  const [employeeId, setEmployeeId] = useState("");
-  const [validEmployees, setValidEmployees] = useState<string[]>([]); // Store employee keys (valid IDs)
+  const [studentId, setStudentId] = useState("");
+  const [validStudents, setValidStudents] = useState<string[]>([]); // Store student keys (valid IDs)
   const router = useRouter();
 
-  // Fetch employee data from /public/employee.json
+  // Fetch student data from /public/student.json
   useEffect(() => {
-    const fetchEmployeeData = async () => {
+    const fetchStudentData = async () => {
       try {
-        const res = await fetch("/employee.json");
+        const res = await fetch("/student.json");
         const data = await res.json();
 
-        // Get all valid employee IDs (keys of the object)
-        const employeeIds = Object.keys(data);
-        setValidEmployees(employeeIds);
+        // Get all valid student IDs (keys of the object)
+        const studentIds = Object.keys(data);
+        setValidStudents(studentIds);
       } catch (error) {
-        console.error("Error fetching employee data", error);
+        console.error("Error fetching student data", error);
       }
     };
 
-    fetchEmployeeData();
+    fetchStudentData();
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if employeeId exists in the list of validEmployees (keys)
-    if (employeeId && validEmployees.includes(employeeId)) {
-      localStorage.setItem("employeeId", employeeId);
+    // Check if studentId exists in the list of validStudents (keys)
+    if (studentId && validStudents.includes(studentId)) {
+      localStorage.setItem("studentId", studentId);
       router.push("/upload");
     } else {
-      toast.error("Invalid Employee ID. Please try again.");
+      toast.error("Invalid Student ID. Please try again.");
     }
   };
 
@@ -51,17 +51,17 @@ export default function LoginPage() {
             <img src="/logo.png" />
             {/* <Stethoscope className="h-12 w-12 text-red-500" /> */}
           </div>
-          <CardTitle className="text-2xl font-bold text-center text-red-700">Employee Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center text-red-700">Student Login</CardTitle>
           <CardDescription className="text-center text-gray-600">Enter your credentials to access the system</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="employeeId" className="text-sm font-medium text-gray-700 flex items-center">
+              <label htmlFor="studentId" className="text-sm font-medium text-gray-700 flex items-center">
                 <UserCircle className="h-4 w-4 mr-2 text-red-500" />
-                Employee ID
+                Student ID
               </label>
-              <Input id="employeeId" type="text" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} required aria-required="true" className="border-red-300 focus:border-red-500 focus:ring-red-500" />
+              <Input id="studentId" type="text" value={studentId} onChange={(e) => setStudentId(e.target.value)} required aria-required="true" className="border-red-300 focus:border-red-500 focus:ring-red-500" />
             </div>
             <Button type="submit" className="w-full bg-red-500 hover:bg-red-600 text-white">
               Log In
